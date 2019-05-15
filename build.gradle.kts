@@ -14,7 +14,7 @@ plugins {
     id("nebula.project").version("6.0.3")
     id("nebula.integtest").version("6.0.3")
 
-    id("org.springframework.boot").version("2.1.4.RELEASE")
+    id("org.springframework.boot").version("2.1.5.RELEASE")
 
     id("nebula.release").version("9.2.0")
 
