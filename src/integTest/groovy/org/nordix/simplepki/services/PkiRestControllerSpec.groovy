@@ -143,6 +143,19 @@ class PkiRestControllerSpec extends BaseSpecification {
             1 * spiedKeyStoreRepository.loadOrCreate(_) >> { throw new Exception('Failed to open file') }
     }
 
+    @Unroll
+    def 'report OK for #uri service'() {
+        when: 'Request the resource'
+            def response = mockMvc.perform(get(uri))
+                .andReturn().response
+
+        then: 'SC is OK'
+            response.status == SC_OK
+
+        where:
+            uri = '/healthz'
+    }
+
     def 'supplies the current CA certificate in PEM format'() {
         when: 'Request the current CA certificate'
             def response = mockMvc.perform(get("/pki/v1/cacert"))

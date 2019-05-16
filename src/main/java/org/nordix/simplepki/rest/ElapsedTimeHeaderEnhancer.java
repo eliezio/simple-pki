@@ -50,7 +50,9 @@ public class ElapsedTimeHeaderEnhancer implements ResponseBodyAdvice<Object> {
         val request = ((ServletServerHttpRequest) serverRequest).getServletRequest();
         val response = ((ServletServerHttpResponse) serverResponse).getServletResponse();
         Timer timer = HttpRequestTimer.load(request);
-        response.setIntHeader("Elapsed-Time", (int) timer.elapsed());
+        if (timer != null) {
+            response.setIntHeader("Elapsed-Time", (int) timer.elapsed());
+        }
         return body;
     }
 }
