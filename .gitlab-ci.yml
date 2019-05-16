@@ -36,6 +36,14 @@ pitest:
     paths:
       - public
 
+docker push:
+  stage: deploy
+  script: >
+    ./gradlew jib -PdockerRegistry=${CI_REGISTRY} -PdockerGroup=${CI_PROJECT_NAMESPACE}
+    -Djib.to.auth.username=${CI_REGISTRY_USER}
+    -Djib.to.auth.password=${CI_REGISTRY_PASSWORD}
+    -Djib.console=plain
+
 pages:
   stage: deploy
   script: "true"
