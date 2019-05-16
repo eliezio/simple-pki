@@ -34,7 +34,8 @@ apply(plugin = "com.epages.restdocs-api-spec")
 
 description = "Simple-PKI API"
 group = "org.nordix"
-val dockerGroup = "ebo"
+val defaultDockerGroup = "ebo"
+val dockerGroup: String? by project
 
 val mainClassName = "org.nordix.simplepki.Application"
 
@@ -224,6 +225,9 @@ configure<com.epages.restdocs.apispec.gradle.OpenApi3Extension> {
 /*
  * Docker Image
  */
+
+val dockerRegistry: String? by project
+
 jib {
     from {
         // Smaller than the default gcr/distroless/java
@@ -231,7 +235,9 @@ jib {
     }
     to {
         val tagVersion = version.toString().substringBefore('-')
-        image = "$dockerGroup/${project.name}:$tagVersion"
+        image = listOf(dockerRegistry, dockerGroup ?: defaultDockerGroup, "${project.name}:$tagVersion")
+            .filterNotNull()
+            .joinToString("/")
     }
     extraDirectories {
         permissions = mapOf("/usr/local/bin/wait-for" to "755")
