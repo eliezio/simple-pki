@@ -140,7 +140,7 @@ class PkiRestControllerSpec extends BaseSpecification {
         then: 'Server fails, reporting a SC=500'
             response.status == SC_INTERNAL_SERVER_ERROR
         and: 'KeyStore I/O failure caused this error'
-            1 * spiedKeyStoreRepository.loadOrCreate(_) >> { throw new Exception('Failed to open file') }
+            1 * spiedKeyStoreRepository.load() >> { throw new Exception('Failed to open file') }
     }
 
     @Unroll

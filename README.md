@@ -31,6 +31,11 @@ You can also build a Docker image from the source code using the
 ./gradlew jibDockerBuild
 ```
 
+## Installation
+
+The first step is create the keystore with the CA entity.
+As an example, you can run the `src/main/scripts/create-ca.sh` that will create a `./data/ca.p12` keystore with default passwords set to `changeit`.
+
 ## Running with 'debug' profile activated
 
 If using Gradle, run:
