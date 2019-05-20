@@ -47,7 +47,7 @@ public class PemConverter {
         if (clazz.isInstance(obj)) {
             return clazz.cast(obj);
         }
-        if ((obj instanceof X509CertificateHolder) && (clazz == X509Certificate.class)) {
+        if (clazz == X509Certificate.class) {
             return clazz.cast(new JcaX509CertificateConverter().getCertificate(((X509CertificateHolder) obj)));
         }
         throw new IllegalArgumentException(String.format("An %s object was expected, whereas a %s object was found",
