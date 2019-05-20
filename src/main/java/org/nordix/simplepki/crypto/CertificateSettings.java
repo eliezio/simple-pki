@@ -33,12 +33,7 @@ class CertificateSettings {
     // See https://tools.ietf.org/html/rfc5280#section-4.1.2.5
     static final Date NEVER_EXPIRES_DATE = Date.from(Instant.parse("9999-12-31T23:59:59Z"));
 
-    static final BasicConstraints CA_BASIC_CONSTRAINTS = new BasicConstraints(1);
-
     static final BasicConstraints NON_CA_BASIC_CONSTRAINTS = new BasicConstraints(false);
-
-    // For a complete list of official Key Usage see https://tools.ietf.org/html/rfc5280#section-4.2.1.3
-    static final KeyUsage CA_KEY_USAGES = new KeyUsage(KeyUsage.keyCertSign | KeyUsage.cRLSign);
 
     static final KeyUsage NON_CA_KEY_USAGES = new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment);
 

@@ -21,13 +21,14 @@ package org.nordix.simplepki.persist;
 
 import org.nordix.simplepki.crypto.PkiEntity;
 
-import java.util.Map;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 
 /**
  * A special repository that contains a single PkiEntity.
  */
 public interface SingleEntityRepository {
 
-    PkiEntity loadOrCreate(Map<String, String> dnMap)
-        throws Exception;
+    PkiEntity load()
+        throws GeneralSecurityException, IOException;
 }

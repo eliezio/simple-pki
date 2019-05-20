@@ -21,12 +21,9 @@ package org.nordix.simplepki.crypto;
 
 import org.nordix.simplepki.persist.SingleEntityRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -34,13 +31,10 @@ public class CaConfiguration {
 
     private final SingleEntityRepository caRepository;
 
-    @Value("#{${app.pki.ca.dn}}")
-    private Map<String, String> caDN;
-
     @Bean(name = "ca")
     @Lazy
     public PkiEntity createCa()
         throws Exception {
-        return caRepository.loadOrCreate(caDN);
+        return caRepository.load();
     }
 }

@@ -20,8 +20,6 @@ spring:
     open-in-view: true
 app:
     pki:
-        ca:
-            dn: "{CN: 'Test CA'}"
         ks:
             alias: ca
             type: pkcs12
