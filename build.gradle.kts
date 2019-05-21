@@ -72,6 +72,7 @@ dependencies {
     implementation("org.springframework.boot", "spring-boot-starter-web")
     implementation("org.springframework.boot", "spring-boot-starter-undertow")
     implementation("org.springframework.boot", "spring-boot-starter-data-jpa")
+    implementation("mysql", "mysql-connector-java")
 
     implementation("org.bouncycastle", "bcprov-jdk15on", bouncyCastleVersion)
     implementation("org.bouncycastle", "bcpkix-jdk15on", bouncyCastleVersion)
