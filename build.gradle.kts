@@ -193,7 +193,7 @@ tasks.jacocoTestCoverageVerification {
  * Pitest
  */
 pitest {
-    pitestVersion = "1.4.7"
+    pitestVersion = "1.4.8"
     timestampedReports = false
     testSourceSets = setOf(sourceSets.test.get(), sourceSets["integTest"])
     excludedClasses = setOf(mainClassName)
