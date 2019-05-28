@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-embedded-h2
+data:
+  URL: amRiYzpoMjpmaWxlOi4vZGF0YS9kYi9wa2k=
+  DRIVER_CLASS_NAME: b3JnLmgyLkRyaXZlcg==
+  USERNAME: c2E=
+  PASSWORD: ""
