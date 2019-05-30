@@ -21,7 +21,7 @@ plugins {
     id("info.solidsoft.pitest").version("1.4.0")
 
     // Quality / Documentation Plugins
-    id("com.adarshr.test-logger").version("1.6.0")
+    id("com.adarshr.test-logger").version("1.7.0")
     id("com.github.ksoichiro.console.reporter").version("0.6.2")
     // NOTE: version 1.5.10 and above are incompatible with GKD and/or Nebula Release plugin
     id("org.asciidoctor.convert").version("1.5.6")
