@@ -72,12 +72,12 @@ dependencies {
     implementation("org.springframework.boot", "spring-boot-starter-web")
     implementation("org.springframework.boot", "spring-boot-starter-undertow")
     implementation("org.springframework.boot", "spring-boot-starter-data-jpa")
-    implementation("mysql", "mysql-connector-java")
 
     implementation("org.bouncycastle", "bcprov-jdk15on", bouncyCastleVersion)
     implementation("org.bouncycastle", "bcpkix-jdk15on", bouncyCastleVersion)
 
     runtime("com.h2database", "h2")
+    runtime("mysql", "mysql-connector-java")
 
     testImplementation("org.spockframework", "spock-core", spockFrameworkVersion)
 
@@ -100,41 +100,12 @@ val jacocoHtmlReportsDir = "$publicReportsDir/jacoco"
 val pitestReportsDir = "$publicReportsDir/pitest"
 
 /*
- * Reproducible Build
+ * All Archives
  */
 tasks.withType<AbstractArchiveTask> {
+    //** reproducible build
     isPreserveFileTimestamps = false
     isReproducibleFileOrder = true
-}
-
-infoBroker {
-    excludedManifestProperties = listOf("Build-Date", "Built-OS", "Built-By", "Build-Host")
-}
-
-fun File.removeLines(predicate: (String) -> Boolean) {
-    val lines = readLines().filterNot(predicate)
-    printWriter().use { out ->
-        lines.forEach { out.println(it) }
-    }
-}
-
-springBoot {
-    // to create META-INF/build-info.properties. Its contents are exported by /info
-    buildInfo {
-        properties {
-            time = null
-        }
-
-        // Watch https://github.com/spring-projects/spring-boot/issues/14494
-        doLast {
-            File(destinationDir, "build-info.properties")
-                    .removeLines { it.startsWith("#") }
-        }
-    }
-}
-
-tasks.asciidoctor {
-    attributes(mapOf("reproducible" to ""))
 }
 
 /*
@@ -161,6 +132,8 @@ tasks.integrationTest {
  */
 // Why we can't use just "task.jacocoTestReport": https://github.com/gradle/kotlin-dsl/issues/1176#issuecomment-435816812
 tasks.getByName<JacocoReport>("jacocoTestReport") {
+    dependsOn(tasks.withType<Test>().asIterable())
+
     executionData(file("$buildDir/jacoco/test.exec"), file("$buildDir/jacoco/integrationTest.exec"))
 
     reports {
@@ -178,6 +151,8 @@ tasks.getByName<JacocoReport>("jacocoTestReport") {
 }
 
 tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.jacocoTestReport)
+
     executionData(tasks.jacocoTestReport.get().executionData)
 
     violationRules {
@@ -191,11 +166,20 @@ tasks.jacocoTestCoverageVerification {
     }
 }
 
+tasks.check {
+    dependsOn(tasks.jacocoTestCoverageVerification)
+}
+
+tasks.reportCoverage {
+    dependsOn(tasks.jacocoTestReport)
+}
+
 /*
  * Pitest
  */
 pitest {
     pitestVersion = "1.4.8"
+    //** reproducible build
     timestampedReports = false
     testSourceSets = setOf(sourceSets.test.get(), sourceSets["integTest"])
     excludedClasses = setOf(mainClassName)
@@ -210,6 +194,10 @@ tasks.pitest {
  * Test-Driven Documentation
  */
 tasks.asciidoctor {
+    dependsOn(tasks.integrationTest)
+
+    //** reproducible build
+    attributes(mapOf("reproducible" to ""))
     separateOutputDirs = false
     outputDir = file(docsDir)
 
@@ -224,9 +212,44 @@ configure<com.epages.restdocs.apispec.gradle.OpenApi3Extension> {
 }
 
 /*
+ * SpringBoot packaging
+ */
+infoBroker {
+    //** reproducible build
+    excludedManifestProperties = listOf("Build-Date", "Built-OS", "Built-By", "Build-Host")
+}
+
+fun File.removeLines(predicate: (String) -> Boolean) {
+    val lines = readLines().filterNot(predicate)
+    printWriter().use { out ->
+        lines.forEach { out.println(it) }
+    }
+}
+
+springBoot {
+    // to create META-INF/build-info.properties. Its contents are exported by /info
+    buildInfo {
+        properties {
+            //** reproducible build
+            time = null
+        }
+
+        //** reproducible build
+        // Watch https://github.com/spring-projects/spring-boot/issues/14494
+        doLast {
+            File(destinationDir, "build-info.properties")
+                .removeLines { it.startsWith("#") }
+        }
+    }
+}
+
+tasks.bootJar {
+    dependsOn(tasks.asciidoctor, "openapi3")
+}
+
+/*
  * Docker Image
  */
-
 val dockerRegistry: String? by project
 
 jib {
@@ -236,8 +259,7 @@ jib {
     }
     to {
         val tagVersion = version.toString().substringBefore('-')
-        image = listOf(dockerRegistry, dockerGroup ?: defaultDockerGroup, "${project.name}:$tagVersion")
-            .filterNotNull()
+        image = listOfNotNull(dockerRegistry, dockerGroup ?: defaultDockerGroup, "${project.name}:$tagVersion")
             .joinToString("/")
     }
     extraDirectories {
@@ -256,37 +278,6 @@ jib {
     }
 }
 
-/*
- * Improve Tasks Dependencies
- */
-tasks {
-
-    jacocoTestReport {
-        dependsOn(withType<Test>().asIterable())
-    }
-
-    jacocoTestCoverageVerification {
-        dependsOn(jacocoTestReport)
-    }
-
-    reportCoverage {
-        dependsOn(jacocoTestReport)
-    }
-
-    // redundant since check already depends on reportCoverage
-    check {
-        dependsOn(jacocoTestReport, jacocoTestCoverageVerification)
-    }
-
-    asciidoctor {
-        dependsOn(integrationTest)
-    }
-
-    bootJar {
-        dependsOn(asciidoctor, "openapi3")
-    }
-
-    jibDockerBuild {
-        dependsOn(build)
-    }
+tasks.jibDockerBuild {
+    dependsOn(tasks.build)
 }
