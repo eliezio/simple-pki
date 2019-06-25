@@ -178,7 +178,7 @@ tasks.reportCoverage {
  * Pitest
  */
 pitest {
-    pitestVersion = "1.4.8"
+    pitestVersion = "1.4.9"
     //** reproducible build
     timestampedReports = false
     testSourceSets = setOf(sourceSets.test.get(), sourceSets["integTest"])
