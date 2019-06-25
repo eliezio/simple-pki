@@ -1,8 +1,12 @@
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
+
 buildscript {
     val restdocsApiSpecVersion: String by project
 
     dependencies {
         classpath("com.epages", "restdocs-api-spec-gradle-plugin", restdocsApiSpecVersion)
+        classpath("org.jsoup", "jsoup", "1.12.1")
     }
 }
 
@@ -281,3 +285,66 @@ jib {
 tasks.jibDockerBuild {
     dependsOn(tasks.build)
 }
+
+/*
+ * Pitest shields.io JSON
+ */
+val redHue = 0.0
+val greenHue = 120.0 / 360.0
+val saturation = 0.9
+val brightness = 0.9
+
+tasks.register("writePitestShieldsJson") {
+    doLast {
+        val doc: Document = Jsoup.parse(File("$pitestReportsDir/index.html"), "ASCII")
+        // WARNING: highly dependent on Pitest version!
+        // The HTML report is the only report that contains the overall result :-(
+        val mutationCoverage = doc.select("html body table:first-of-type tbody tr td:last-of-type div div:last-of-type")[0].text()
+        val values = mutationCoverage.split("/")
+        val ratio = values[0].toFloat() / values[1].toFloat()
+        val powerScale = HSB(redHue + ratio * greenHue, saturation, brightness)
+        val json = buildShieldsJson("Pitest", mutationCoverage, powerScale)
+        File("$pitestReportsDir/shields.json").writeText(json)
+
+    }
+}
+
+tasks.pitest {
+    finalizedBy("writePitestShieldsJson")
+}
+
+@Suppress("FunctionName")
+fun HSBtoRGB(hsb: HSB): RGB {
+    val h = (hsb.hue - Math.floor(hsb.hue)) * 6.0
+    val f = h - Math.floor(h)
+    val b = scaleTo255(hsb.brightness)
+    val m = scaleTo255(hsb.brightness * (1.0 - hsb.saturation))
+    val t = scaleTo255(hsb.brightness * (1.0 - hsb.saturation * (1.0 - f)))
+    val q = scaleTo255(hsb.brightness * (1.0 - hsb.saturation * f))
+    return when (h.toInt()) {
+        0 -> RGB(b, t, m)
+        1 -> RGB(q, b, m)
+        2 -> RGB(m, b, t)
+        3 -> RGB(m, q, b)
+        4 -> RGB(t, m, b)
+        else -> RGB(b, m, q)
+    }
+}
+
+fun scaleTo255(value: Double) = (value * 255.0 + 0.5).toInt()
+
+data class HSB(val hue: Double, val saturation: Double, val brightness: Double)
+
+data class RGB(val red: Int, val green: Int, val blue: Int) {
+    override fun toString(): String {
+        return "#%02x%02x%02x".format(red, green, blue)
+    }
+}
+
+// See https://shields.io/endpoint
+fun buildShieldsJson(label: String, message: String, hsb: HSB) = """{
+    "schemaVersion": 1,
+    "label": "$label",
+    "message": "$message",
+    "color": "${HSBtoRGB(hsb)}"
+}"""
