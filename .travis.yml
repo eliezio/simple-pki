@@ -1,0 +1,61 @@
+# ============LICENSE_START=======================================================
+#  Copyright (C) 2019 Nordix Foundation.
+# ================================================================================
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+# ============LICENSE_END=========================================================
+language: java
+
+jdk:
+  - openjdk8
+
+dist: xenial
+
+install: true
+
+env:
+  global:
+    - secure: "IwNH1kY5KAXz9GQdQwuGok2S6A1wcwQI5rF9C/2hDu48/hjq1+Ji5gXgBLbJMVn/MtksibOv2LZDM2FdSXB51KBw8hCJ4iewbREKXWp4EHYib0UbvDlhpT8fy4fztOyYIxIP7UHipQyCS0c5D8kr0al9hdhIre6tLNr2kQJt+Y2PW/m2gH9H+HrOx1mBccPbzu2bu3cHD84/hlMto39obGb0tD4iADbT9/l3InaW/RhHgAjtgjnEuvY5FJXx0dmwZJ0/HarbKRtob8T0bkkNZxwqhpdXIvvQejIjXVds3W9mMU8nSE+H64Nl6F6rWmDiu2LFTXAfPk59/IV+q7WxKyoZqE1WQOtZvtHUAKZitSkIkqFvmEbtJIIa5kynRzafKz2nuz7uUTQ8zFw/g59LX7nqb5NJ5+Yux+T06mMV6Vka3FdnbXH7CDsJmdPbqDoPyaWWiLxZwcVKeBTY2sO9gHM6ArlsrukYrxZHk+8be8ZlWEQcs525ACfLK/PNTQCOnwm34shUNkIJW/Fgh2Ml+9eIWvI0cd9v2WHgydPYJFyqPnRja6B76BLUkf+8NGqrOWjY4Fo0CrUeceeT9dwNesN+GcMEGgbOQBSmC19FZBoUZeppD2/FWirPd+ULPzZDEiZ2CWw4sIpAyFTj8bMCXsZT4moFmoX0/BGcIpiUXvA="
+
+script:
+  - echo 'Buid starts'
+  - ./gradle/buildViaTravis.sh
+  - echo 'Gathering code-coverage for Codecov graphing'
+  - bash <(curl -s https://codecov.io/bash)
+  - echo 'Submitting to SonarQube for a thorough analysis'
+  - ./gradlew sonarqube -x test -i -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN -Dsonar.branch.name=$TRAVIS_BRANCH
+  - echo 'Generates Asciidoc-authored documentation'
+  - ./gradlew asciidoctor
+  - echo 'Mutation Testing'
+  - test "$PITEST_ENABLED" != "true" || ./gradlew pitest
+  - echo 'Publish Docker Image'
+  - ./gradlew jib -PdockerGroup=${CI_PROJECT_NAMESPACE} -Djib.to.auth.username=${CI_REGISTRY_USER} -Djib.to.auth.password=${CI_REGISTRY_PASSWORD} -Djib.console=plain
+
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github-token:
+    secure: "ear1tWgroVjd2/z4L+Ttnc3vwrZRvHJRhyORQKkRgAd8+BxLgrTSLvHSpHwOaDRwfkXq0vtEN2GUP861oYE+oAx/bQvpuEyRjFXyup/YtwWfeEcOGB7WinxLx02znRF6NEH4sT7LAgmQkHmmQ3j9Y+JVIN+Cgyn6fIjZj8Ry6uG/jz+pZWRbtUijgsY5be0xPc7AaHVYTSPW6uea46P5yyNkV9wIjMnLh7OZUlsBn9Jo+qnGu+Xh+n66csABeEA/9YtFnDskkm/0cbkClbXwT3znfGvE9W1qSg88D9jbrPkk0TWNdvmFf/dggbN2HcJ1B9DUCrFpOn7gHVPRrGK07D8oGIYSOn+1N+Wa0MgW5g5NcZrgPeypNgxudvsz/D079Vj0o2BjDLbV2K5ClOWP9uEBb0TLgG50gqBrhwHdwgT/DT3SfMiSdfFv8XJ9wmS1y/G8M4ma5POW44XBtpf2egh2UZ2Yvpm5wAZAaikUm7yEXDbmwxXtRU5d6HTo10SaohrSNV5IwyL/nusyR8oVloKPmoqOe4WyI4r8m1v3TAcQlfDnyQ3J/bdkFUW1NW59BY+WyhH72tX96Md7uivL4Pydr+2us1UaUYBtmefmc0Elyz3vixlifNr6nF6WB4+/KWfytdF8r0K4oKqfEbE6vAcNAqfjM4kTUAfI8ftUq44="
+  local_dir: public
+  on:
+    branch: master
+
+before_cache:
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - "$HOME/.gradle/caches/"
+    - "$HOME/.gradle/wrapper/"

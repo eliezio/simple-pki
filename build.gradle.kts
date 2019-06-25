@@ -25,6 +25,7 @@ plugins {
     id("info.solidsoft.pitest").version("1.4.0")
 
     // Quality / Documentation Plugins
+    id("org.sonarqube").version("2.7.1")
     id("com.adarshr.test-logger").version("1.7.0")
     id("com.github.ksoichiro.console.reporter").version("0.6.2")
     // NOTE: version 1.5.10 and above are incompatible with GKD and/or Nebula Release plugin
@@ -40,6 +41,8 @@ description = "Simple-PKI API"
 group = "org.nordix"
 val defaultDockerGroup = "ebo"
 val dockerGroup: String? by project
+val scmGroup = "eliezio"
+val scmProject = "simple-pki"
 
 val mainClassName = "org.nordix.simplepki.Application"
 
@@ -197,15 +200,28 @@ tasks.pitest {
 /*
  * Test-Driven Documentation
  */
+val docFilesMap = mapOf("README" to "index")
+
 tasks.asciidoctor {
-    dependsOn(tasks.integrationTest)
+    sourceDir = projectDir
+    sources(delegateClosureOf<PatternSet> {
+        include(docFilesMap.keys.map { "$it.adoc" })
+    })
+    separateOutputDirs = false
+    outputDir = file(publicReportsDir)
+
+    // My way to solve the issue https://github.com/spring-projects/spring-restdocs/issues/562
+    attributes(mapOf("gradle-projectdir" to projectDir.path))
 
     //** reproducible build
     attributes(mapOf("reproducible" to ""))
-    separateOutputDirs = false
-    outputDir = file(docsDir)
 
-    attributes(mapOf("project-version" to version.toString()))
+    doLast {
+        docFilesMap.forEach {
+            file("$publicReportsDir/${it.key}.html")
+                .renameTo(file("$publicReportsDir/${it.value}.html"))
+        }
+    }
 }
 
 configure<com.epages.restdocs.apispec.gradle.OpenApi3Extension> {
@@ -252,6 +268,23 @@ tasks.bootJar {
 }
 
 /*
+ * SonarQube
+ */
+sonarqube {
+    properties {
+        properties(mapOf(
+            "sonar.projectKey" to "${scmGroup}_$scmProject",
+            "sonar.organization" to "$scmGroup-github",
+            "sonar.links.homepage" to "https://github.com/$scmGroup/$scmProject",
+            "sonar.links.ci" to "https://travis-ci.org/$scmGroup/$scmProject",
+            "sonar.links.scm" to "https://github.com/$scmGroup/$scmProject",
+            "sonar.links.issue" to "https://github.com/$scmGroup/$scmProject/issues",
+            "sonar.exclusions" to "**/${mainClassName.substringAfterLast('.')}.java"
+        ))
+    }
+}
+
+/*
  * Docker Image
  */
 val dockerRegistry: String? by project
@@ -271,7 +304,7 @@ jib {
     }
     container {
         jvmFlags = listOf(
-                "-noverify", "-XX:TieredStopAtLevel=2",
+                "-noverify",
                 "-XX:+UnlockExperimentalVMOptions",
                 "-XX:+UseCGroupMemoryLimitForHeap",
                 // See http://www.thezonemanager.com/2015/07/whats-so-special-about-devurandom.html

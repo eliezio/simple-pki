@@ -1,0 +1,72 @@
+ifndef::env-github[]
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 3
+:sectlinks:
+
+++++
+<div style="position:relative;min-width:960px">
+<a href=" https://github.com/eliezio/simple-pki"><img width="149" height="149" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_darkblue_121621.png?resize=149%2C149" class="attachment-full size-full" alt="Fork me on GitHub" data-recalc-dims="1" style=" position: absolute;right:0;top:0"></a>
+</div>
+++++
+endif::[]
+
+= Simple PKI
+Eliézio Oliveira <eliezio.oliveira@est.tech>
+v{project-version}
+
+image:https://travis-ci.org/eliezio/simple-pki.svg?branch=master[Build, link="https://travis-ci.org/eliezio/simple-pki"]
+image:https://sonarcloud.io/api/project_badges/measure?project=eliezio_simple-pki&metric=alert_status[SonarQube Quality Gate, link="https://sonarcloud.io/dashboard?id=eliezio_simple-pki"]
+image:https://sonarcloud.io/api/project_badges/measure?project=eliezio_simple-pki&metric=coverage[Coverage, link="https://sonarcloud.io/project/activity?custom_metrics=coverage&graph=custom&id=eliezio_simple-pki"]
+image:https://img.shields.io/endpoint.svg?url=https://eliezio.github.io/simple-pki/pitest/shields.json[Pitest, link="https://eliezio.github.io/simple-pki/pitest/"]
+
+== Overview
+
+This application provides the basic services typically found on any PKI:
+
+- Generates X.509 certificates;
+- Allow preemptive revocation of issued certificates;
+- Generates an updated CRL (Certificate Revocation List);
+- Supply the CA certificate.
+
+The PKI implemented is comprised of a single CA with _no_ intermediate CAs.
+
+== Code Coverage
+
+image:https://codecov.io/gh/eliezio/simple-pki/branch/master/graphs/tree.svg[link="https://codecov.io/gh/eliezio/simple-pki/branch/master/graphs/tree.svg"]
+
+== Building the application
+
+To build the application from the sources just run:
+
+```
+./gradlew build
+```
+
+== Docker Image
+
+You can also build a Docker image from the source code using the
+[Jib plugin](https://github.com/GoogleContainerTools/jib/tree/master/jib-gradle-plugin#build-your-image) like, for example:
+
+```
+./gradlew jibDockerBuild
+```
+
+== Installation
+
+The first step is create the keystore with the CA entity.
+As an example, you can run the `src/main/scripts/create-ca.sh` that will create a `./data/ca.p12` keystore with default passwords set to `changeit`.
+
+== Running with 'debug' profile activated
+
+If using Gradle, run:
+
+```
+./gradlew bootRun --args='--spring.profiles.active=debug'
+```
+
+== License
+
+Copyright (C) 2019 Nordix Foundation.
