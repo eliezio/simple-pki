@@ -39,7 +39,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.function.LongPredicate;
 
 @Component
 @AllArgsConstructor
@@ -112,13 +112,13 @@ public class Pki {
         }
 
         /**
-         * Applies the given filter, and disable the CRL generation in case it returns true.
+         * Applies the given predicate, and disable the CRL generation in case it returns true.
          *
-         * @param filter The filter to be applied to the CRL.thisUpdateTime property.
+         * @param predicate The predicate to be applied to the CRL.thisUpdateTime property.
          * @return This builder.
          */
-        public CrlBuilder filterByUpdateTime(Function<Long, Boolean> filter) {
-            skip = filter.apply(editionDate.getTime());
+        public CrlBuilder filterByUpdateTime(LongPredicate predicate) {
+            skip = predicate.test(editionDate.getTime());
             return this;
         }
 
