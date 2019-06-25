@@ -26,7 +26,7 @@ plugins {
     // NOTE: version 1.5.10 and above are incompatible with GKD and/or Nebula Release plugin
     id("org.asciidoctor.convert").version("1.5.6")
 
-    id("com.google.cloud.tools.jib").version("1.2.0")
+    id("com.google.cloud.tools.jib").version("1.3.0")
 }
 
 apply(plugin = "io.spring.dependency-management")
