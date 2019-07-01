@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Pki.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">simple-pki</a> &gt; <a href="index.source.html" class="el_package">org.nordix.simplepki.crypto</a> &gt; <span class="el_source">Pki.java</span></div><h1>Pki.java</h1><pre class="source lang-java linenums">/*-
+ * ============LICENSE_START=======================================================
+ *  Copyright (C) 2019 Nordix Foundation.
+ * ================================================================================
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ * ============LICENSE_END=========================================================
+ */
+package org.nordix.simplepki.crypto;
+
+import org.nordix.simplepki.persist.EndEntity;
+import org.nordix.simplepki.persist.EndEntityRepository;
+import lombok.AllArgsConstructor;
+import lombok.val;
+import org.bouncycastle.asn1.x509.CRLReason;
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.inject.Provider;
+import java.io.IOException;
+import java.io.StringReader;
+import java.security.cert.CertificateException;
+import java.security.cert.X509CRL;
+import java.security.cert.X509Certificate;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.function.LongPredicate;
+
+@Component
+@AllArgsConstructor
+@SuppressWarnings(&quot;squid:S00112&quot;)   // Generic exceptions should never be thrown
+public class Pki {
+
+    // Properties
+    // Using Provider&lt;&gt; to allow lazily fetching the CA singleton
+    private final Provider&lt;PkiEntity&gt; ca;
+
+    // Collaborators
+    private final EndEntityRepository endEntityRepository;
+    private final PkiOperations pkiOperations;
+
+    public X509Certificate getCaCert() {
+<span class="fc" id="L58">        return ca.get().getCertificate();</span>
+    }
+
+    public CrlBuilder crlBuilder() {
+<span class="fc" id="L62">        val revocations = endEntityRepository.getAllRevocations();</span>
+<span class="fc" id="L63">        return new CrlBuilder(revocations);</span>
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public X509Certificate sign(PKCS10CertificationRequest csr)
+        throws Exception {
+<span class="fc" id="L69">        val entity = new EndEntity();</span>
+<span class="fc" id="L70">        endEntityRepository.save(entity);</span>
+<span class="fc" id="L71">        X509Certificate cert = pkiOperations.signCsr(csr, entity.getSerialNumber(), ca.get());</span>
+<span class="fc" id="L72">        entity.setSubject(X500NameUtil.canonicalSubjectName(cert));</span>
+<span class="fc" id="L73">        entity.setNotValidBefore(cert.getNotBefore());</span>
+<span class="fc" id="L74">        entity.setNotValidAfter(cert.getNotAfter());</span>
+<span class="fc" id="L75">        entity.setCertificate(PemConverter.toPem(cert));</span>
+<span class="fc" id="L76">        endEntityRepository.save(entity);</span>
+<span class="fc" id="L77">        return cert;</span>
+    }
+
+    public X509Certificate getCertificate(long serialNumber)
+        throws CertificateException, IOException {
+<span class="fc" id="L82">        val entity = endEntityRepository.findById(serialNumber)</span>
+<span class="fc" id="L83">            .orElseThrow(NoSuchElementException::new);</span>
+<span class="fc" id="L84">        return PemConverter.fromPem(new StringReader(entity.getCertificate()), X509Certificate.class);</span>
+    }
+
+    public boolean revoke(long serialNumber, Date date) {
+<span class="fc" id="L88">        val entity = endEntityRepository.findById(serialNumber)</span>
+<span class="fc" id="L89">            .orElseThrow(() -&gt; new NoSuchElementException(</span>
+<span class="fc" id="L90">                String.format(&quot;No certificate with serialNumber=%d was found&quot;, serialNumber)));</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        if (entity.isRevoked()) {</span>
+<span class="fc" id="L92">            return false;</span>
+        }
+<span class="fc" id="L94">        entity.revoke(date, CRLReason.privilegeWithdrawn);</span>
+<span class="fc" id="L95">        endEntityRepository.save(entity);</span>
+<span class="fc" id="L96">        return true;</span>
+    }
+
+    /**
+     * A lazy CRL builder that allows the caller to avoid the CRL actual generation in case a filter criteria is met.
+     */
+    public class CrlBuilder {
+        private final List&lt;RevocationEntry&gt; revocations;
+        private final Date editionDate;
+<span class="fc" id="L105">        private boolean skip = false;</span>
+
+<span class="fc" id="L107">        CrlBuilder(List&lt;RevocationEntry&gt; revocations) {</span>
+<span class="fc" id="L108">            this.revocations = revocations;</span>
+<span class="fc" id="L109">            this.editionDate = revocations.stream()</span>
+<span class="fc" id="L110">                .map(RevocationEntry::date)</span>
+<span class="fc" id="L111">                .max(Comparator.naturalOrder())</span>
+<span class="fc" id="L112">                .orElse(ca.get().getCertificate().getNotBefore());</span>
+<span class="fc" id="L113">        }</span>
+
+        /**
+         * Applies the given predicate, and disable the CRL generation in case it returns true.
+         *
+         * @param predicate The predicate to be applied to the CRL.thisUpdateTime property.
+         * @return This builder.
+         */
+        public CrlBuilder filterByUpdateTime(LongPredicate predicate) {
+<span class="fc" id="L122">            skip = predicate.test(editionDate.getTime());</span>
+<span class="fc" id="L123">            return this;</span>
+        }
+
+        /**
+         * Eventually builds the CRL if no skipping condition was met.
+         *
+         * @return The optional CRL.
+         * @throws Exception Thrown if the generation fails for any reason.
+         */
+        public Optional&lt;X509CRL&gt; build()
+            throws Exception {
+<span class="fc bfc" id="L134" title="All 2 branches covered.">            return skip</span>
+<span class="fc" id="L135">                ? Optional.empty()</span>
+<span class="fc" id="L136">                : Optional.of(pkiOperations.generateCrl(revocations, editionDate, ca.get()));</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span></div></body></html>
