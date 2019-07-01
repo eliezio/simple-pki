@@ -26,6 +26,7 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.List;
 
+@SuppressWarnings("squid:S00112")   // Generic exceptions should never be thrown
 public interface PkiOperations {
 
     X509Certificate signCsr(PKCS10CertificationRequest csr, long serialNumber, PkiEntity ca)
