@@ -45,6 +45,7 @@ import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 @RestController
 @RequestMapping("/pki/v1")
 @RequiredArgsConstructor
+@SuppressWarnings("squid:S00112")   // Generic exceptions should never be thrown
 public class PkiRestController {
 
     private static final MediaType APPLICATION_X_PEM_FILE = MediaType.valueOf("application/x-pem-file");

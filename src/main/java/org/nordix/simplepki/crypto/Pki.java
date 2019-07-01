@@ -43,6 +43,7 @@ import java.util.function.LongPredicate;
 
 @Component
 @AllArgsConstructor
+@SuppressWarnings("squid:S00112")   // Generic exceptions should never be thrown
 public class Pki {
 
     // Properties

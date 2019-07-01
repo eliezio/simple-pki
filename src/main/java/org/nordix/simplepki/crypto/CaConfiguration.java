@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@SuppressWarnings("squid:S00112")   // Generic exceptions should never be thrown
 public class CaConfiguration {
 
     private final SingleEntityRepository caRepository;
