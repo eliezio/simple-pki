@@ -1,5 +1,6 @@
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import kotlin.math.floor
 
 buildscript {
     val restdocsApiSpecVersion: String by project
@@ -83,12 +84,12 @@ dependencies {
     implementation("org.bouncycastle", "bcprov-jdk15on", bouncyCastleVersion)
     implementation("org.bouncycastle", "bcpkix-jdk15on", bouncyCastleVersion)
 
-    runtime("com.h2database", "h2")
-    runtime("mysql", "mysql-connector-java")
+    runtimeOnly("com.h2database", "h2")
+    runtimeOnly("mysql", "mysql-connector-java")
 
     testImplementation("org.spockframework", "spock-core", spockFrameworkVersion)
 
-    testRuntime("com.athaydes", "spock-reports", spockReportsVersion)
+    testRuntimeOnly("com.athaydes", "spock-reports", spockReportsVersion)
 
     integTestImplementation("org.springframework.boot", "spring-boot-starter-test")
     integTestImplementation("org.spockframework", "spock-spring", spockFrameworkVersion)
@@ -348,8 +349,8 @@ tasks.pitest {
 
 @Suppress("FunctionName")
 fun HSBtoRGB(hsb: HSB): RGB {
-    val h = (hsb.hue - Math.floor(hsb.hue)) * 6.0
-    val f = h - Math.floor(h)
+    val h = (hsb.hue - floor(hsb.hue)) * 6.0
+    val f = h - floor(h)
     val b = scaleTo255(hsb.brightness)
     val m = scaleTo255(hsb.brightness * (1.0 - hsb.saturation))
     val t = scaleTo255(hsb.brightness * (1.0 - hsb.saturation * (1.0 - f)))
