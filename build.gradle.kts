@@ -1,5 +1,6 @@
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import kotlin.math.floor
 
 buildscript {
     val restdocsApiSpecVersion: String by project
@@ -15,20 +16,20 @@ plugins {
     groovy
     jacoco
 
-    id("org.springframework.boot").version("2.1.6.RELEASE")
+    id("org.springframework.boot") version "2.1.6.RELEASE"
 
-    id("nebula.release").version("9.2.0")
+    id("nebula.release") version "9.2.0"
 
-    id("info.solidsoft.pitest").version("1.4.0")
+    id("info.solidsoft.pitest") version "1.4.0"
 
     // Quality / Documentation Plugins
-    id("org.sonarqube").version("2.7.1")
-    id("com.adarshr.test-logger").version("1.7.0")
-    id("com.github.ksoichiro.console.reporter").version("0.6.2")
+    id("org.sonarqube") version "2.7.1"
+    id("com.adarshr.test-logger") version "1.7.0"
+    id("com.github.ksoichiro.console.reporter") version "0.6.2"
     // NOTE: version 1.5.10 and above are incompatible with GKD and/or Nebula Release plugin
-    id("org.asciidoctor.convert").version("1.5.6")
+    id("org.asciidoctor.convert") version "1.5.6"
 
-    id("com.google.cloud.tools.jib").version("1.3.0")
+    id("com.google.cloud.tools.jib") version "1.3.0"
 }
 
 apply(plugin = "io.spring.dependency-management")
@@ -51,9 +52,6 @@ configurations {
     compileOnly {
         extendsFrom(configurations.annotationProcessor.get())
     }
-    compile {
-        exclude(module = "spring-boot-starter-tomcat")
-    }
 }
 
 val restdocsApiSpecVersion: String by project
@@ -63,7 +61,7 @@ val spockFrameworkVersion = "1.3-groovy-2.5"
 val spockReportsVersion = "1.6.2"
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
@@ -73,15 +71,17 @@ dependencies {
 
     implementation("javax.inject", "javax.inject", "1")
     implementation("org.springframework.boot", "spring-boot-starter")
-    implementation("org.springframework.boot", "spring-boot-starter-web")
+    implementation("org.springframework.boot", "spring-boot-starter-web") {
+        exclude(module = "spring-boot-starter-tomcat")
+    }
     implementation("org.springframework.boot", "spring-boot-starter-undertow")
     implementation("org.springframework.boot", "spring-boot-starter-data-jpa")
 
     implementation("org.bouncycastle", "bcprov-jdk15on", bouncyCastleVersion)
     implementation("org.bouncycastle", "bcpkix-jdk15on", bouncyCastleVersion)
 
-    runtime("com.h2database", "h2")
-    runtime("mysql", "mysql-connector-java")
+    runtimeOnly("com.h2database", "h2")
+    runtimeOnly("mysql", "mysql-connector-java")
 
     testImplementation("org.springframework.boot", "spring-boot-starter-test")
     testImplementation("org.spockframework", "spock-core", spockFrameworkVersion)
@@ -90,7 +90,7 @@ dependencies {
     testImplementation("com.epages", "restdocs-api-spec-mockmvc", restdocsApiSpecVersion)
     testImplementation("ch.qos.logback", "logback-classic")
 
-    testRuntime("com.athaydes", "spock-reports", spockReportsVersion)
+    testRuntimeOnly("com.athaydes", "spock-reports", spockReportsVersion)
 }
 
 val docsDir = "$buildDir/resources/main/static"
@@ -172,15 +172,15 @@ tasks.reportCoverage {
  * Pitest
  */
 pitest {
-    pitestVersion = "1.4.9"
+    pitestVersion.set("1.4.9")
     //** reproducible build
-    timestampedReports = false
-    excludedClasses = setOf(mainClassName)
-    mutationThreshold = 100
+    timestampedReports.set(false)
+    excludedClasses.set(setOf(mainClassName))
+    mutationThreshold.set(100)
 }
 
 tasks.pitest {
-    reportDir = file(pitestReportsDir)
+    reportDir.set(file(pitestReportsDir))
 }
 
 /*
@@ -330,8 +330,8 @@ tasks.pitest {
 
 @Suppress("FunctionName")
 fun HSBtoRGB(hsb: HSB): RGB {
-    val h = (hsb.hue - Math.floor(hsb.hue)) * 6.0
-    val f = h - Math.floor(h)
+    val h = (hsb.hue - floor(hsb.hue)) * 6.0
+    val f = h - floor(h)
     val b = scaleTo255(hsb.brightness)
     val m = scaleTo255(hsb.brightness * (1.0 - hsb.saturation))
     val t = scaleTo255(hsb.brightness * (1.0 - hsb.saturation * (1.0 - f)))
