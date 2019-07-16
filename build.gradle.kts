@@ -32,7 +32,7 @@ plugins {
     // NOTE: version 1.5.10 and above are incompatible with GKD and/or Nebula Release plugin
     id("org.asciidoctor.convert").version("1.5.6")
 
-    id("com.google.cloud.tools.jib").version("1.3.0")
+    id("com.google.cloud.tools.jib").version("2.4.0")
 }
 
 apply(plugin = "io.spring.dependency-management")
@@ -291,10 +291,6 @@ sonarqube {
 val dockerRegistry: String? by project
 
 jib {
-    from {
-        // Smaller than the default gcr/distroless/java
-        image = "openjdk:8-jre-alpine"
-    }
     to {
         val tagVersion = version.toString().substringBefore('-')
         image = listOfNotNull(dockerRegistry, dockerGroup ?: defaultDockerGroup, "${project.name}:$tagVersion")
