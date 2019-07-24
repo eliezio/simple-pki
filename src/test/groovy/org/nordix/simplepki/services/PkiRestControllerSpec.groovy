@@ -21,18 +21,18 @@ package org.nordix.simplepki.services
 
 import com.epages.restdocs.apispec.ResourceDocumentation
 import com.epages.restdocs.apispec.ResourceSnippetParameters
-import org.nordix.simplepki.BaseSpecification
-import org.nordix.simplepki.clock.Timer
-import org.nordix.simplepki.crypto.PkiOperations
-import org.nordix.simplepki.persist.EndEntity
-import org.nordix.simplepki.persist.KeyStoreRepository
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.PropertyNamingStrategy
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import groovy.sql.Sql
 import org.bouncycastle.asn1.x509.CRLReason
 import org.bouncycastle.cert.X509CertificateHolder
 import org.bouncycastle.util.test.FixedSecureRandom
 import org.junit.Rule
+import org.nordix.simplepki.BaseSpecification
+import org.nordix.simplepki.clock.Timer
+import org.nordix.simplepki.crypto.PkiOperations
+import org.nordix.simplepki.persist.EndEntity
+import org.nordix.simplepki.persist.KeyStoreRepository
 import org.spockframework.spring.SpringSpy
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs
@@ -51,7 +51,6 @@ import org.springframework.test.web.servlet.ResultHandler
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Stepwise
-import spock.lang.Unroll
 
 import javax.sql.DataSource
 import java.security.SecureRandom
@@ -112,7 +111,7 @@ class PkiRestControllerSpec extends BaseSpecification {
     long crlLastUpdate
 
     @Shared
-    ObjectMapper mapper = new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
+    ObjectMapper mapper = new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
 
     @Autowired
     DataSource dataSource
@@ -143,7 +142,6 @@ class PkiRestControllerSpec extends BaseSpecification {
             1 * spiedKeyStoreRepository.load() >> { throw new Exception('Failed to open file') }
     }
 
-    @Unroll
     def 'report OK for #uri service'() {
         when: 'Request the resource'
             def response = mockMvc.perform(get(uri))
@@ -209,7 +207,6 @@ class PkiRestControllerSpec extends BaseSpecification {
             crlLastUpdate = response.getDateHeader(LAST_MODIFIED)
     }
 
-    @Unroll
     def 'supports conditional request of CRL #description'() {
         when: 'Request the current CRL'
             def response = mockMvc.perform(get("/pki/v1/crl")
@@ -243,7 +240,6 @@ class PkiRestControllerSpec extends BaseSpecification {
             documentId = description.endsWith('*')
     }
 
-    @Unroll
     def 'report BAD REQUEST when data sent to be signed is a #description'() {
         given: 'Retrieve the source contents'
             def input = getClass().getResourceAsStream("/__data__/$filename").bytes
