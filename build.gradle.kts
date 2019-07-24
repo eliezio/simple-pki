@@ -16,7 +16,7 @@ plugins {
     groovy
     jacoco
 
-    id("org.springframework.boot") version "2.1.6.RELEASE"
+    id("org.springframework.boot") version "2.7.3"
 
     id("nebula.release") version "9.2.0"
 
@@ -57,8 +57,8 @@ configurations {
 val restdocsApiSpecVersion: String by project
 
 val bouncyCastleVersion = "1.61"
-val spockFrameworkVersion = "1.3-groovy-2.5"
-val spockReportsVersion = "1.6.2"
+val spockFrameworkVersion = "2.2-groovy-3.0"
+val spockReportsVersion = "2.3.1-groovy-3.0"
 
 repositories {
     mavenCentral()
@@ -84,8 +84,11 @@ dependencies {
     runtimeOnly("mysql", "mysql-connector-java")
 
     testImplementation("org.springframework.boot", "spring-boot-starter-test")
-    testImplementation("org.spockframework", "spock-core", spockFrameworkVersion)
-    testImplementation("org.spockframework", "spock-spring", spockFrameworkVersion)
+    testImplementation(platform("org.spockframework:spock-bom:$spockFrameworkVersion"))
+    testImplementation("org.spockframework:spock-core")
+    testImplementation("org.spockframework:spock-junit4")
+    testImplementation("org.spockframework:spock-spring")
+    testImplementation("org.codehaus.groovy:groovy-sql")
     testImplementation("org.springframework.restdocs", "spring-restdocs-mockmvc")
     testImplementation("com.epages", "restdocs-api-spec-mockmvc", restdocsApiSpecVersion)
     testImplementation("ch.qos.logback", "logback-classic")
@@ -115,6 +118,8 @@ tasks.withType<AbstractArchiveTask> {
  * All Tests
  */
 tasks.withType<Test> {
+    useJUnitPlatform()
+
     // faster start-up time
     jvmArgs("-noverify", "-XX:TieredStopAtLevel=2")
     systemProperty("com.athaydes.spockframework.report.outputDir", spockReportsDir)
@@ -220,27 +225,12 @@ configure<com.epages.restdocs.apispec.gradle.OpenApi3Extension> {
 /*
  * SpringBoot packaging
  */
-
-fun File.removeLines(predicate: (String) -> Boolean) {
-    val lines = readLines().filterNot(predicate)
-    printWriter().use { out ->
-        lines.forEach { out.println(it) }
-    }
-}
-
 springBoot {
     // to create META-INF/build-info.properties. Its contents are exported by /info
     buildInfo {
         properties {
             //** reproducible build
             time = null
-        }
-
-        //** reproducible build
-        // Watch https://github.com/spring-projects/spring-boot/issues/14494
-        doLast {
-            File(destinationDir, "build-info.properties")
-                .removeLines { it.startsWith("#") }
         }
     }
 }
