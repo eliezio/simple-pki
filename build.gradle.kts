@@ -23,7 +23,7 @@ plugins {
 
     id("nebula.release").version("11.1.0")
 
-    id("info.solidsoft.pitest").version("1.4.0")
+    id("info.solidsoft.pitest").version("1.5.1")
 
     // Quality / Documentation Plugins
     id("org.sonarqube").version("2.7.1")
@@ -186,16 +186,16 @@ tasks.reportCoverage {
  * Pitest
  */
 pitest {
-    pitestVersion = "1.4.9"
+    pitestVersion.set("1.5.2")
     //** reproducible build
-    timestampedReports = false
-    testSourceSets = setOf(sourceSets.test.get(), sourceSets["integTest"])
-    excludedClasses = setOf(mainClassName)
-    mutationThreshold = 100
+    timestampedReports.set(false)
+    testSourceSets.set(setOf(sourceSets.test.get(), sourceSets["integTest"]))
+    excludedClasses.set(setOf(mainClassName))
+    mutationThreshold.set(100)
 }
 
 tasks.pitest {
-    reportDir = file(pitestReportsDir)
+    reportDir.set(file(pitestReportsDir))
 }
 
 /*
