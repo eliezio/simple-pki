@@ -21,7 +21,7 @@ plugins {
 
     id("org.springframework.boot").version("2.1.15.RELEASE")
 
-    id("nebula.release").version("9.2.0")
+    id("nebula.release").version("11.1.0")
 
     id("info.solidsoft.pitest").version("1.4.0")
 
