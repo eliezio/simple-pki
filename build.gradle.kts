@@ -3,10 +3,7 @@ import org.jsoup.nodes.Document
 import kotlin.math.floor
 
 buildscript {
-    val restdocsApiSpecVersion: String by project
-
     dependencies {
-        classpath("com.epages", "restdocs-api-spec-gradle-plugin", restdocsApiSpecVersion)
         classpath("org.jsoup", "jsoup", "1.12.1")
     }
 }
@@ -26,14 +23,13 @@ plugins {
     id("org.sonarqube") version "2.7.1"
     id("com.adarshr.test-logger") version "1.7.0"
     id("com.github.ksoichiro.console.reporter") version "0.6.2"
-    // NOTE: version 1.5.10 and above are incompatible with GKD and/or Nebula Release plugin
-    id("org.asciidoctor.convert") version "1.5.6"
+    id("com.epages.restdocs-api-spec") version "0.16.2"
+    id("org.asciidoctor.jvm.convert") version "3.3.2"
 
     id("com.google.cloud.tools.jib") version "1.3.0"
 }
 
 apply(plugin = "io.spring.dependency-management")
-apply(plugin = "com.epages.restdocs-api-spec")
 
 description = "Simple-PKI API"
 group = "org.nordix"
@@ -64,10 +60,12 @@ repositories {
     mavenCentral()
 }
 
+val asciidoctorExt: Configuration by configurations.creating
+
 dependencies {
     annotationProcessor("org.projectlombok", "lombok")
 
-    asciidoctor("org.springframework.restdocs", "spring-restdocs-asciidoctor")
+    asciidoctorExt("org.springframework.restdocs", "spring-restdocs-asciidoctor")
 
     implementation("javax.inject", "javax.inject", "1")
     implementation("org.springframework.boot", "spring-boot-starter")
@@ -194,12 +192,13 @@ tasks.pitest {
 val docFilesMap = mapOf("README" to "index")
 
 tasks.asciidoctor {
-    sourceDir = projectDir
-    sources(delegateClosureOf<PatternSet> {
-        include(docFilesMap.keys.map { "$it.adoc" })
-    })
-    separateOutputDirs = false
-    outputDir = file(publicReportsDir)
+    dependsOn(tasks.test)
+
+    configurations("asciidoctorExt")
+    sourceDir("$projectDir/src/docs/asciidoc")
+    inputs.dir(snippetsDir)
+    setOutputDir(publicReportsDir)
+    baseDirFollowsSourceDir()
 
     // My way to solve the issue https://github.com/spring-projects/spring-restdocs/issues/562
     attributes(mapOf("gradle-projectdir" to projectDir.path))
