@@ -27,7 +27,7 @@ plugins {
 
     // Quality / Documentation Plugins
     id("org.sonarqube").version("2.7.1")
-    id("com.adarshr.test-logger").version("1.7.0")
+    id("com.adarshr.test-logger").version("2.0.0")
     id("com.github.ksoichiro.console.reporter").version("0.6.2")
     // NOTE: version 1.5.10 and above are incompatible with GKD and/or Nebula Release plugin
     id("org.asciidoctor.convert").version("1.5.6")
