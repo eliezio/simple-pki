@@ -15,9 +15,6 @@ plugins {
     groovy
     jacoco
 
-    id("nebula.project").version("6.0.3")
-    id("nebula.integtest").version("6.0.3")
-
     id("org.springframework.boot").version("2.1.6.RELEASE")
 
     id("nebula.release").version("9.2.0")
@@ -86,15 +83,14 @@ dependencies {
     runtime("com.h2database", "h2")
     runtime("mysql", "mysql-connector-java")
 
+    testImplementation("org.springframework.boot", "spring-boot-starter-test")
     testImplementation("org.spockframework", "spock-core", spockFrameworkVersion)
+    testImplementation("org.spockframework", "spock-spring", spockFrameworkVersion)
+    testImplementation("org.springframework.restdocs", "spring-restdocs-mockmvc")
+    testImplementation("com.epages", "restdocs-api-spec-mockmvc", restdocsApiSpecVersion)
+    testImplementation("ch.qos.logback", "logback-classic")
 
     testRuntime("com.athaydes", "spock-reports", spockReportsVersion)
-
-    integTestImplementation("org.springframework.boot", "spring-boot-starter-test")
-    integTestImplementation("org.spockframework", "spock-spring", spockFrameworkVersion)
-    integTestImplementation("org.springframework.restdocs", "spring-restdocs-mockmvc")
-    integTestImplementation("com.epages", "restdocs-api-spec-mockmvc", restdocsApiSpecVersion)
-    integTestImplementation("ch.qos.logback", "logback-classic")
 }
 
 val docsDir = "$buildDir/resources/main/static"
@@ -119,13 +115,6 @@ tasks.withType<AbstractArchiveTask> {
  * All Tests
  */
 tasks.withType<Test> {
-    jvmArgs("-noverify")
-}
-
-/*
- * Integration Tests
- */
-tasks.integrationTest {
     // faster start-up time
     jvmArgs("-noverify", "-XX:TieredStopAtLevel=2")
     systemProperty("com.athaydes.spockframework.report.outputDir", spockReportsDir)
@@ -140,8 +129,6 @@ tasks.integrationTest {
 // Why we can't use just "task.jacocoTestReport": https://github.com/gradle/kotlin-dsl/issues/1176#issuecomment-435816812
 tasks.getByName<JacocoReport>("jacocoTestReport") {
     dependsOn(tasks.withType<Test>().asIterable())
-
-    executionData(file("$buildDir/jacoco/test.exec"), file("$buildDir/jacoco/integrationTest.exec"))
 
     reports {
         html.isEnabled = true
@@ -188,7 +175,6 @@ pitest {
     pitestVersion = "1.4.9"
     //** reproducible build
     timestampedReports = false
-    testSourceSets = setOf(sourceSets.test.get(), sourceSets["integTest"])
     excludedClasses = setOf(mainClassName)
     mutationThreshold = 100
 }
@@ -234,10 +220,6 @@ configure<com.epages.restdocs.apispec.gradle.OpenApi3Extension> {
 /*
  * SpringBoot packaging
  */
-infoBroker {
-    //** reproducible build
-    excludedManifestProperties = listOf("Build-Date", "Built-OS", "Built-By", "Build-Host")
-}
 
 fun File.removeLines(predicate: (String) -> Boolean) {
     val lines = readLines().filterNot(predicate)
