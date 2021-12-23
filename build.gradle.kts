@@ -1,9 +1,14 @@
+import com.github.gundy.semver4j.SemVer
+import com.github.gundy.semver4j.model.Version
+import org.apache.commons.text.StringSubstitutor
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import java.util.function.Predicate
 import kotlin.math.floor
 
 buildscript {
     dependencies {
+        classpath("org.apache.commons:commons-text:1.9")
         classpath("org.jsoup", "jsoup", "1.12.1")
     }
 }
@@ -16,6 +21,7 @@ plugins {
     id("org.springframework.boot") version "2.7.3"
 
     id("org.ajoberstar.grgit") version "5.0.0"
+    id("com.github.ben-manes.versions") version "0.42.0"
 
     id("info.solidsoft.pitest") version "1.4.0"
 
@@ -294,6 +300,55 @@ jib {
 
 tasks.jibDockerBuild {
     dependsOn(tasks.build)
+}
+
+/*
+ * ben-manes.versions
+ */
+
+val upgradesToIgnore = listOf(
+    "ch.qos.logback:*:>\${currentVersionMajor}.\${currentVersionMinor}",
+    "com.h2database:h2:>\${currentVersionMajor}",
+    "org.hibernate.validator:hibernate-validator:>\${currentVersionMajor}",
+)
+
+fun toModulePredicate(moduleSpec: String, currentVersion: String): Predicate<ModuleComponentIdentifier> {
+    val (group, module, version) = moduleSpec.split(':')
+    val currentVersionRange: String by lazy {
+        val currentVersionObject = Version.fromString(currentVersion)
+        StringSubstitutor.replace(
+            version,
+            mapOf(
+                "currentVersionMajor" to currentVersionObject.major,
+                "currentVersionMinor" to currentVersionObject.minor,
+                "currentVersionPatch" to currentVersionObject.patch,
+            )
+        )
+    }
+
+    return Predicate {
+        (it.group == group)
+                && ((module == "*") || (it.module == module))
+                && SemVer.satisfies(it.version, currentVersionRange)
+    }
+}
+
+val nonStableRegex by lazy {
+    "([\\.-](alpha|beta|ea|m|preview|rc)[\\.-]?\\d*(-groovy-\\d+\\.\\d+)?|-b\\d+\\.\\d+)$".toRegex(RegexOption.IGNORE_CASE)
+}
+
+fun isNonStable(version: String): Boolean {
+    return nonStableRegex.containsMatchIn(version)
+}
+
+
+tasks.dependencyUpdates {
+    rejectVersionIf {
+        candidate.version.endsWith("-groovy-4.0")
+                || isNonStable(candidate.version)
+                || upgradesToIgnore.map { toModulePredicate(it, currentVersion) }
+            .any { matcher -> matcher.test(candidate) }
+    }
 }
 
 /*
