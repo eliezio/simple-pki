@@ -21,5 +21,8 @@ spring:
 app:
     pki:
         ks:
+            resource: file:/data/ca.p12
             alias: ca
             type: pkcs12
+            storepass: changeit
+            keypass: changeit
