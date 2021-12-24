@@ -15,7 +15,7 @@ plugins {
 
     id("org.springframework.boot") version "2.7.3"
 
-    id("nebula.release") version "9.2.0"
+    id("org.ajoberstar.grgit") version "5.0.0"
 
     id("info.solidsoft.pitest") version "1.4.0"
 
@@ -33,6 +33,12 @@ apply(plugin = "io.spring.dependency-management")
 
 description = "Simple-PKI API"
 group = "org.nordix"
+version = grgit.describe(mapOf(
+    "tags" to true,
+    "always" to true,
+)).removePrefix("v")
+println("version: $version")
+
 val defaultDockerGroup = "ebo"
 val dockerGroup: String? by project
 val scmGroup = "eliezio"
