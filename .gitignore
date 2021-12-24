@@ -34,3 +34,8 @@
 
 !.idea/copyright/
 !.idea/fileTemplates/
+
+/src/main/generated/
+/node_modules
+package-lock.json
+/.husky
