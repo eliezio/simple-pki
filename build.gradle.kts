@@ -23,7 +23,7 @@ plugins {
     id("org.ajoberstar.grgit") version "5.0.0"
     id("com.github.ben-manes.versions") version "0.42.0"
 
-    id("info.solidsoft.pitest") version "1.4.0"
+    id("info.solidsoft.pitest") version "1.9.0"
 
     // Quality / Documentation Plugins
     id("org.sonarqube") version "2.7.1"
@@ -187,7 +187,8 @@ tasks.reportCoverage {
  * Pitest
  */
 pitest {
-    pitestVersion.set("1.4.9")
+    pitestVersion.set("1.9.5")
+    junit5PluginVersion.set("0.15")
     //** reproducible build
     timestampedReports.set(false)
     excludedClasses.set(setOf(mainClassName))
