@@ -9,7 +9,7 @@ import kotlin.math.floor
 buildscript {
     dependencies {
         classpath("org.apache.commons:commons-text:1.9")
-        classpath("org.jsoup", "jsoup", "1.12.1")
+        classpath("org.jsoup", "jsoup", "1.15.3")
     }
 }
 
