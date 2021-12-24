@@ -26,7 +26,7 @@ plugins {
     id("info.solidsoft.pitest") version "1.9.0"
 
     // Quality / Documentation Plugins
-    id("org.sonarqube") version "2.7.1"
+    id("org.sonarqube") version "3.4.0.2513"
     id("com.adarshr.test-logger") version "3.2.0"
     id("com.github.ksoichiro.console.reporter") version "0.6.3"
     id("com.epages.restdocs-api-spec") version "0.16.2"
