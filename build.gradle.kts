@@ -21,7 +21,7 @@ plugins {
 
     // Quality / Documentation Plugins
     id("org.sonarqube") version "2.7.1"
-    id("com.adarshr.test-logger") version "1.7.0"
+    id("com.adarshr.test-logger") version "3.2.0"
     id("com.github.ksoichiro.console.reporter") version "0.6.2"
     id("com.epages.restdocs-api-spec") version "0.16.2"
     id("org.asciidoctor.jvm.convert") version "3.3.2"
