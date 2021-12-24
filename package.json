@@ -1,0 +1,38 @@
+{
+  "scripts": {
+    "postinstall": "node scripts/installHusky.js && direnv allow ."
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^17.1.2",
+    "@commitlint/config-conventional": "^17.1.0",
+    "husky": "^8.0.1"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ],
+    "rules": {
+      "scope-enum": [
+        2,
+        "always",
+        [
+          "release",
+          "core",
+          "build"
+        ]
+      ],
+      "subject-case": [
+        2,
+        "always",
+        [
+          "sentence-case"
+        ]
+      ]
+    }
+  }
+}
