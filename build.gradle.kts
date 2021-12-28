@@ -111,8 +111,6 @@ file(docsDir).mkdirs()
 
 val snippetsDir = "$buildDir/generated-snippets"
 val publicReportsDir = "public"
-val spockReportsDir = "$publicReportsDir/spock"
-val jacocoHtmlReportsDir = "$publicReportsDir/jacoco"
 val pitestReportsDir = "$publicReportsDir/pitest"
 
 /*
@@ -132,55 +130,47 @@ tasks.withType<Test> {
 
     // faster start-up time
     jvmArgs("-noverify", "-XX:TieredStopAtLevel=2")
-    systemProperty("com.athaydes.spockframework.report.outputDir", spockReportsDir)
 
     // register this extra output dir
     outputs.dir(snippetsDir)
+    finalizedBy(tasks.reportCoverage)
 }
 
 /*
  * JaCoCo
  */
-// Why we can't use just "task.jacocoTestReport": https://github.com/gradle/kotlin-dsl/issues/1176#issuecomment-435816812
-tasks.getByName<JacocoReport>("jacocoTestReport") {
-    dependsOn(tasks.withType<Test>().asIterable())
-
-    reports {
-        html.isEnabled = true
-        html.destination = file(jacocoHtmlReportsDir)
-    }
-
+tasks.withType<JacocoReportBase> {
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.map {
-            fileTree(it) {
+            fileTree(it).apply {
                 exclude("**/Application.class")
+                exclude("**/*MapperImpl.class")
             }
         }))
     }
 }
 
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+}
+
 tasks.jacocoTestCoverageVerification {
     dependsOn(tasks.jacocoTestReport)
-
-    executionData(tasks.jacocoTestReport.get().executionData)
-
     violationRules {
         rule {
-            element = "CLASS"
-            excludes = listOf(mainClassName)
             limit {
-                minimum = "1.00".toBigDecimal()
+                minimum = "0.90".toBigDecimal()
             }
         }
     }
 }
 
-tasks.check {
-    dependsOn(tasks.jacocoTestCoverageVerification)
-}
-
 tasks.reportCoverage {
     dependsOn(tasks.jacocoTestReport)
+}
+
+tasks.check {
+    dependsOn(tasks.jacocoTestCoverageVerification)
 }
 
 /*
