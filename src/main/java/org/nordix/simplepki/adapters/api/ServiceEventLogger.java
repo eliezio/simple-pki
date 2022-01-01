@@ -21,31 +21,36 @@ package org.nordix.simplepki.adapters.api;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.nordix.simplepki.common.Timer;
+import lombok.val;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.HandlerInterceptor;
 
-import javax.inject.Provider;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @Component
+@WebFilter("/pki/**")
 @RequiredArgsConstructor
 @Slf4j
-public class ServiceEventLogger implements HandlerInterceptor {
-
-    private final Provider<Timer> timerFactory;
+public class ServiceEventLogger implements Filter {
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        HttpRequestTimer.save(request, timerFactory.get());
-        return true;
-    }
-
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
-        Timer timer = HttpRequestTimer.load(request);
-        log.info("evt=SERVICE method={} uri={} sc={} elapsed={}", request.getMethod(), request.getRequestURI(),
-                response.getStatus(), timer.elapsed());
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+        throws IOException, ServletException {
+        val startTime = System.currentTimeMillis();
+        try {
+            chain.doFilter(request, response);
+        } finally {
+            val req = (HttpServletRequest) request;
+            val resp = (HttpServletResponse) response;
+            log.info("evt=SERVICE method={} uri={} sc={} elapsed={}", req.getMethod(), req.getRequestURI(),
+                resp.getStatus(), (System.currentTimeMillis() - startTime));
+        }
     }
 }

@@ -20,8 +20,6 @@
 package org.nordix.simplepki.application;
 
 import lombok.RequiredArgsConstructor;
-import org.nordix.simplepki.common.ClockTimer;
-import org.nordix.simplepki.common.Timer;
 import org.nordix.simplepki.domain.model.BasicPkiOperations;
 import org.nordix.simplepki.domain.model.Pki;
 import org.nordix.simplepki.domain.model.PkiEntity;
@@ -31,12 +29,9 @@ import org.nordix.simplepki.domain.ports.SingleEntityRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Scope;
 
 import javax.inject.Provider;
 import java.time.Clock;
-
-import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE;
 
 @Configuration
 @RequiredArgsConstructor
@@ -46,12 +41,6 @@ public class ApplicationConfig {
     @Bean
     public Clock clock() {
         return Clock.systemDefaultZone();
-    }
-
-    @Bean
-    @Scope(SCOPE_PROTOTYPE)
-    public Timer timer(Clock clock) {
-        return new ClockTimer(clock);
     }
 
     @Bean(name = "ca")
