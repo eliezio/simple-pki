@@ -25,7 +25,7 @@ import org.nordix.simplepki.domain.model.Pki;
 import org.nordix.simplepki.domain.model.PkiEntity;
 import org.nordix.simplepki.domain.model.PkiOperations;
 import org.nordix.simplepki.domain.ports.EndEntityRepository;
-import org.nordix.simplepki.domain.ports.SingleEntityRepository;
+import org.nordix.simplepki.domain.ports.PkiEntityRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -45,7 +45,7 @@ public class ApplicationConfig {
 
     @Bean(name = "ca")
     @Lazy
-    public PkiEntity createCa(SingleEntityRepository caRepository)
+    public PkiEntity createCa(PkiEntityRepository caRepository)
         throws Exception {
         return caRepository.load();
     }

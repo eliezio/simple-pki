@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.nordix.simplepki.application.KeyStoreConfig;
 import org.nordix.simplepki.domain.model.PkiEntity;
-import org.nordix.simplepki.domain.ports.SingleEntityRepository;
+import org.nordix.simplepki.domain.ports.PkiEntityRepository;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -34,7 +34,7 @@ import java.security.cert.X509Certificate;
 
 @Service
 @RequiredArgsConstructor
-public class KeyStoreRepository implements SingleEntityRepository {
+public class PkiEntityKeyStoreRepository implements PkiEntityRepository {
 
     private final KeyStoreConfig config;
 
