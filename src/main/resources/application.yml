@@ -26,3 +26,6 @@ app:
             type: pkcs12
             storepass: changeit
             keypass: changeit
+server:
+  error:
+    include-message: always

@@ -105,8 +105,9 @@ dependencies {
     testImplementation("org.spockframework:spock-junit4")
     testImplementation("org.spockframework:spock-spring")
     testImplementation("org.codehaus.groovy:groovy-sql")
-    testImplementation("org.springframework.restdocs", "spring-restdocs-mockmvc")
-    testImplementation("com.epages", "restdocs-api-spec-mockmvc", restdocsApiSpecVersion)
+    testImplementation("io.rest-assured:rest-assured")
+    testImplementation("org.springframework.restdocs", "spring-restdocs-restassured")
+    testImplementation("com.epages", "restdocs-api-spec-restassured", restdocsApiSpecVersion)
     testImplementation("ch.qos.logback", "logback-classic")
 
     testRuntimeOnly("com.athaydes", "spock-reports", spockReportsVersion)
@@ -319,6 +320,7 @@ val upgradesToIgnore = listOf(
     "ch.qos.logback:*:>\${currentVersionMajor}.\${currentVersionMinor}",
     "com.h2database:h2:>\${currentVersionMajor}",
     "org.hibernate.validator:hibernate-validator:>\${currentVersionMajor}",
+    "io.rest-assured:rest-assured:>\${currentVersionMajor}",
 )
 
 fun toModulePredicate(moduleSpec: String, currentVersion: String): Predicate<ModuleComponentIdentifier> {
