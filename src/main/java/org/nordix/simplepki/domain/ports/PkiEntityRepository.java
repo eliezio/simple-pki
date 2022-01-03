@@ -27,7 +27,7 @@ import java.security.GeneralSecurityException;
 /**
  * A special repository that contains a single PkiEntity.
  */
-public interface SingleEntityRepository {
+public interface PkiEntityRepository {
 
     PkiEntity load()
         throws GeneralSecurityException, IOException;
