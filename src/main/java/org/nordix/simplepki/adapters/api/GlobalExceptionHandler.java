@@ -23,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -33,15 +32,15 @@ import java.util.NoSuchElementException;
 @Slf4j
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    protected void handleIllegalArgumentException(IllegalArgumentException ex, HttpServletResponse response)
+        throws IOException {
+        response.sendError(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+    }
+
     @ExceptionHandler(NoSuchElementException.class)
     protected void handleNoSuchElementException(NoSuchElementException ex, HttpServletResponse response)
         throws IOException {
         response.sendError(HttpStatus.NOT_FOUND.value(), ex.getMessage());
     }
-
-//    @ExceptionHandler(IOException.class)
-//    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-//    public void handleOtherExceptions(IOException ex) {
-//        log.error("Internal server error", ex);
-//    }
 }
