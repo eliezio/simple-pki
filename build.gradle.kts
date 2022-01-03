@@ -241,7 +241,7 @@ configure<com.epages.restdocs.apispec.gradle.OpenApi3Extension> {
 /*
  * SpringBoot packaging
  */
-tasks.bootJar {
+tasks.jar {
     manifest {
         attributes(mapOf(
             "Implementation-Title" to project.name,
@@ -295,6 +295,7 @@ jib {
         image = listOfNotNull(dockerRegistry, dockerGroup ?: defaultDockerGroup, "${project.name}:$tagVersion")
             .joinToString("/")
     }
+    containerizingMode = "packaged"
     extraDirectories {
         permissions.set(mapOf("/usr/local/bin/wait-for" to "755"))
     }
