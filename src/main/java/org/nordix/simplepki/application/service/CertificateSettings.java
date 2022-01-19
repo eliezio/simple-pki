@@ -17,7 +17,7 @@
  * SPDX-License-Identifier: Apache-2.0
  * ============LICENSE_END=========================================================
  */
-package org.nordix.simplepki.domain.model;
+package org.nordix.simplepki.application.service;
 
 import lombok.experimental.UtilityClass;
 import org.bouncycastle.asn1.x509.BasicConstraints;

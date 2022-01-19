@@ -20,17 +20,12 @@
 package org.nordix.simplepki.application;
 
 import lombok.RequiredArgsConstructor;
-import org.nordix.simplepki.domain.model.BasicPkiOperations;
-import org.nordix.simplepki.domain.model.Pki;
 import org.nordix.simplepki.domain.model.PkiEntity;
-import org.nordix.simplepki.domain.model.PkiOperations;
-import org.nordix.simplepki.domain.ports.EndEntityRepository;
-import org.nordix.simplepki.domain.ports.PkiEntityRepository;
+import org.nordix.simplepki.application.port.out.PkiEntityRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
-import javax.inject.Provider;
 import java.time.Clock;
 
 @Configuration
@@ -48,15 +43,5 @@ public class ApplicationConfig {
     public PkiEntity createCa(PkiEntityRepository caRepository)
         throws Exception {
         return caRepository.load();
-    }
-
-    @Bean
-    public PkiOperations pkiOperations(Clock clock) {
-        return new BasicPkiOperations(clock);
-    }
-
-    @Bean
-    public Pki pki(Provider<PkiEntity> caProvider, EndEntityRepository endEntityRepository, PkiOperations pkiOperations) {
-        return new Pki(caProvider, endEntityRepository, pkiOperations);
     }
 }

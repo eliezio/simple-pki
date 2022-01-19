@@ -31,7 +31,7 @@ import java.util.Date;
 @Entity
 @Table(name = "END_ENTITY")
 @Data
-public class JpaEndEntity {
+class JpaEndEntity {
     @Id
     private long serialNumber;
     @Version

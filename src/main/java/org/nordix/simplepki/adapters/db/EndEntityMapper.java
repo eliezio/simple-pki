@@ -5,7 +5,7 @@ import org.mapstruct.factory.Mappers;
 import org.nordix.simplepki.domain.model.EndEntity;
 
 @Mapper
-public interface EndEntityMapper {
+interface EndEntityMapper {
 
     EndEntityMapper INSTANCE = Mappers.getMapper(EndEntityMapper.class);
 

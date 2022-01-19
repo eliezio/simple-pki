@@ -1,4 +1,4 @@
-package org.nordix.simplepki.domain.ports;
+package org.nordix.simplepki.application.port.out;
 
 import org.nordix.simplepki.domain.model.EndEntity;
 import org.nordix.simplepki.domain.model.RevocationEntry;

@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class BasicRestController {
+class BasicRestController {
 
     // TODO: replace by /actuator/info
     @GetMapping(path = "/healthz")

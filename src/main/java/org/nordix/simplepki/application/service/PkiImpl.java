@@ -17,15 +17,18 @@
  * SPDX-License-Identifier: Apache-2.0
  * ============LICENSE_END=========================================================
  */
-package org.nordix.simplepki.domain.model;
+package org.nordix.simplepki.application.service;
 
 import lombok.AllArgsConstructor;
 import lombok.val;
 import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
+import org.nordix.simplepki.application.port.in.Pki;
 import org.nordix.simplepki.common.PemConverter;
 import org.nordix.simplepki.common.X500NameUtil;
-import org.nordix.simplepki.domain.ports.EndEntityRepository;
+import org.nordix.simplepki.domain.model.*;
+import org.nordix.simplepki.application.port.out.EndEntityRepository;
+import org.springframework.stereotype.Component;
 
 import javax.inject.Provider;
 import java.io.IOException;
@@ -40,9 +43,10 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.LongPredicate;
 
+@Component
 @AllArgsConstructor
 @SuppressWarnings("squid:S00112")   // Generic exceptions should never be thrown
-public class Pki {
+class PkiImpl implements Pki {
 
     // Properties
     // Using Provider<> to allow lazily fetching the CA singleton
@@ -52,15 +56,18 @@ public class Pki {
     private final EndEntityRepository endEntityRepository;
     private final PkiOperations pkiOperations;
 
+    @Override
     public X509Certificate getCaCert() {
         return ca.get().getCertificate();
     }
 
+    @Override
     public CrlBuilder crlBuilder() {
         val revocations = endEntityRepository.getAllRevocations();
-        return new CrlBuilder(revocations);
+        return new CrlBuilderImpl(revocations);
     }
 
+    @Override
     public X509Certificate sign(PKCS10CertificationRequest csr)
         throws Exception {
         val entity = new EndEntity();
@@ -73,11 +80,13 @@ public class Pki {
         return cert;
     }
 
+    @Override
     public X509Certificate getCertificate(String serialNumber)
         throws CertificateException, IOException {
         return getCertificate(SerialNumberConverter.fromString(serialNumber));
     }
 
+    @Override
     public X509Certificate getCertificate(long serialNumber)
         throws CertificateException, IOException {
         val entity = endEntityRepository.findById(serialNumber)
@@ -85,10 +94,12 @@ public class Pki {
         return PemConverter.fromPem(new StringReader(entity.getCertificate()), X509Certificate.class);
     }
 
+    @Override
     public boolean revoke(String serialNumber, Date date) {
         return revoke(SerialNumberConverter.fromString(serialNumber), date);
     }
 
+    @Override
     public boolean revoke(long serialNumber, Date date) {
         val entity = endEntityRepository.findById(serialNumber)
             .orElseThrow(() -> new NoSuchElementException(
@@ -104,12 +115,12 @@ public class Pki {
     /**
      * A lazy CRL builder that allows the caller to avoid the CRL actual generation in case a filter criteria is met.
      */
-    public class CrlBuilder {
+    private class CrlBuilderImpl implements CrlBuilder {
         private final List<RevocationEntry> revocations;
         private final Date editionDate;
         private boolean skip = false;
 
-        CrlBuilder(List<RevocationEntry> revocations) {
+        CrlBuilderImpl(List<RevocationEntry> revocations) {
             this.revocations = revocations;
             this.editionDate = revocations.stream()
                 .map(RevocationEntry::date)
@@ -123,6 +134,7 @@ public class Pki {
          * @param predicate The predicate to be applied to the CRL.thisUpdateTime property.
          * @return This builder.
          */
+        @Override
         public CrlBuilder filterByUpdateTime(LongPredicate predicate) {
             skip = predicate.test(editionDate.getTime());
             return this;
@@ -134,6 +146,7 @@ public class Pki {
          * @return The optional CRL.
          * @throws Exception Thrown if the generation fails for any reason.
          */
+        @Override
         public Optional<X509CRL> build()
             throws Exception {
             return skip
