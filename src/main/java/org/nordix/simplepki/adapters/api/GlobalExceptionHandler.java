@@ -30,7 +30,7 @@ import java.util.NoSuchElementException;
 
 @ControllerAdvice
 @Slf4j
-public class GlobalExceptionHandler {
+class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     protected void handleIllegalArgumentException(IllegalArgumentException ex, HttpServletResponse response)

@@ -17,7 +17,7 @@
  * SPDX-License-Identifier: Apache-2.0
  * ============LICENSE_END=========================================================
  */
-package org.nordix.simplepki.domain.ports;
+package org.nordix.simplepki.application.port.out;
 
 import org.nordix.simplepki.domain.model.PkiEntity;
 

@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.nordix.simplepki.common.PemConverter;
-import org.nordix.simplepki.domain.model.Pki;
+import org.nordix.simplepki.application.port.in.Pki;
 import org.nordix.simplepki.domain.model.SerialNumberConverter;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.MediaType;
@@ -48,7 +48,7 @@ import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 @RequestMapping("/pki/v1")
 @RequiredArgsConstructor
 @SuppressWarnings("squid:S00112")   // Generic exceptions should never be thrown
-public class PkiRestController {
+class PkiRestController {
 
     private static final MediaType APPLICATION_X_PEM_FILE = MediaType.valueOf("application/x-pem-file");
 

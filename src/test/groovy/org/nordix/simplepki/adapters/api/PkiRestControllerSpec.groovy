@@ -41,7 +41,7 @@ import org.nordix.simplepki.application.BaseSpecification
 import org.nordix.simplepki.domain.model.EndEntity
 import org.nordix.simplepki.domain.model.PkiOperations
 import org.nordix.simplepki.domain.model.SerialNumberConverter
-import org.nordix.simplepki.domain.ports.PkiEntityRepository
+import org.nordix.simplepki.application.port.out.PkiEntityRepository
 import org.spockframework.spring.SpringSpy
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs

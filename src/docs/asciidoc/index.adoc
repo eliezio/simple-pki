@@ -57,7 +57,7 @@ If the CRL has _not_ been updated so far, the HTTP response will be:
 
 include::{snippets}/get-cond-crl/http-response.adoc[]
 
-Otherwise you'll receive a normal CRL as a PEM attachement like before.
+Otherwise you'll receive a normal CRL as a PEM attachment like before.
 ====
 
 [[issue-cert]]

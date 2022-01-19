@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 @Component
-public class HandleOpenSSLDateHeaderFilter implements Filter {
+class HandleOpenSSLDateHeaderFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)

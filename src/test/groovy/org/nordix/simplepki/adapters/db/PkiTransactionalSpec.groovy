@@ -22,8 +22,8 @@ package org.nordix.simplepki.adapters.db
 import groovy.sql.Sql
 import org.bouncycastle.pkcs.PKCS10CertificationRequest
 import org.nordix.simplepki.application.BaseSpecification
+import org.nordix.simplepki.application.port.in.Pki
 import org.nordix.simplepki.common.PemConverter
-import org.nordix.simplepki.domain.model.Pki
 import org.nordix.simplepki.domain.model.PkiOperations
 import org.spockframework.spring.SpringSpy
 import org.springframework.beans.factory.annotation.Autowired

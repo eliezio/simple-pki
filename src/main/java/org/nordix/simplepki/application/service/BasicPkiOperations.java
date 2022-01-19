@@ -17,7 +17,7 @@
  * SPDX-License-Identifier: Apache-2.0
  * ============LICENSE_END=========================================================
  */
-package org.nordix.simplepki.domain.model;
+package org.nordix.simplepki.application.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -32,6 +32,10 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
+import org.nordix.simplepki.domain.model.PkiEntity;
+import org.nordix.simplepki.domain.model.PkiOperations;
+import org.nordix.simplepki.domain.model.RevocationEntry;
+import org.springframework.stereotype.Component;
 
 import java.math.BigInteger;
 import java.security.cert.CRLException;
@@ -42,14 +46,15 @@ import java.util.Date;
 import java.util.List;
 
 import static org.bouncycastle.cert.jcajce.JcaX500NameUtil.getSubject;
-import static org.nordix.simplepki.domain.model.CertificateSettings.EXTENDED_KEY_USAGES;
-import static org.nordix.simplepki.domain.model.CertificateSettings.NEVER_EXPIRES_DATE;
-import static org.nordix.simplepki.domain.model.CertificateSettings.NON_CA_BASIC_CONSTRAINTS;
-import static org.nordix.simplepki.domain.model.CertificateSettings.NON_CA_KEY_USAGES;
-import static org.nordix.simplepki.domain.model.CertificateSettings.SIGNATURE_ALGORITHM;
+import static org.nordix.simplepki.application.service.CertificateSettings.EXTENDED_KEY_USAGES;
+import static org.nordix.simplepki.application.service.CertificateSettings.NEVER_EXPIRES_DATE;
+import static org.nordix.simplepki.application.service.CertificateSettings.NON_CA_BASIC_CONSTRAINTS;
+import static org.nordix.simplepki.application.service.CertificateSettings.NON_CA_KEY_USAGES;
+import static org.nordix.simplepki.application.service.CertificateSettings.SIGNATURE_ALGORITHM;
 
+@Component
 @RequiredArgsConstructor
-public class BasicPkiOperations implements PkiOperations {
+class BasicPkiOperations implements PkiOperations {
 
     private final Clock clock;
 

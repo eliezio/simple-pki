@@ -38,7 +38,7 @@ import java.io.IOException;
 @WebFilter("/pki/**")
 @RequiredArgsConstructor
 @Slf4j
-public class ServiceEventLogger implements Filter {
+class ServiceEventLogger implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)

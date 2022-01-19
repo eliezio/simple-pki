@@ -22,7 +22,7 @@ package org.nordix.simplepki.adapters.db;
 import lombok.AllArgsConstructor;
 import org.nordix.simplepki.domain.model.EndEntity;
 import org.nordix.simplepki.domain.model.RevocationEntry;
-import org.nordix.simplepki.domain.ports.EndEntityRepository;
+import org.nordix.simplepki.application.port.out.EndEntityRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -32,7 +32,7 @@ import java.util.stream.StreamSupport;
 
 @Component
 @AllArgsConstructor
-public class JpaEndEntityRepository implements EndEntityRepository {
+class JpaEndEntityRepository implements EndEntityRepository {
 
     private final JpaEndEntityCrudRepository repository;
 
