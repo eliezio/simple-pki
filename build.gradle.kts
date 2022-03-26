@@ -1,6 +1,7 @@
 import com.github.gundy.semver4j.SemVer
 import com.github.gundy.semver4j.model.Version
 import org.apache.commons.text.StringSubstitutor
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.util.function.Predicate
@@ -17,6 +18,12 @@ plugins {
     java
     groovy
     jacoco
+
+    val kotlinVersion = "1.7.10"
+    kotlin("jvm") version kotlinVersion
+    kotlin("kapt") version kotlinVersion
+    kotlin("plugin.spring") version kotlinVersion
+    kotlin("plugin.jpa") version kotlinVersion
 
     id("org.springframework.boot") version "2.7.3"
 
@@ -56,12 +63,6 @@ java {
     sourceCompatibility = JavaVersion.VERSION_11
 }
 
-configurations {
-    compileOnly {
-        extendsFrom(configurations.annotationProcessor.get())
-    }
-}
-
 val restdocsApiSpecVersion: String by project
 
 val bouncyCastleVersion = "1.70"
@@ -76,12 +77,10 @@ repositories {
 val asciidoctorExt: Configuration by configurations.creating
 
 dependencies {
-    annotationProcessor("org.projectlombok", "lombok")
-
     asciidoctorExt("org.springframework.restdocs", "spring-restdocs-asciidoctor")
 
     implementation("org.mapstruct:mapstruct:$mapstructVersion")
-    annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
+    kapt("org.mapstruct:mapstruct-processor:$mapstructVersion")
 
     implementation("javax.inject", "javax.inject", "1")
     implementation("org.springframework.boot", "spring-boot-starter")
@@ -91,6 +90,9 @@ dependencies {
     implementation("org.springframework.boot", "spring-boot-starter-undertow")
     implementation("org.springframework.boot", "spring-boot-starter-data-jpa")
     implementation("org.hibernate.validator:hibernate-validator")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
     implementation("org.bouncycastle", "bcprov-jdk15on", bouncyCastleVersion)
     implementation("org.bouncycastle", "bcpkix-jdk15on", bouncyCastleVersion)
@@ -127,6 +129,13 @@ tasks.compileJava {
     ))
 }
 
+tasks.withType<KotlinCompile> {
+    kotlinOptions {
+        freeCompilerArgs = listOf("-Xjsr305=strict")
+        jvmTarget = "11"
+    }
+}
+
 /*
  * All Archives
  */
@@ -157,7 +166,7 @@ tasks.withType<JacocoReportBase> {
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.map {
             fileTree(it).apply {
-                exclude("**/Application.class")
+                exclude("**/ApplicationKt.class")
                 exclude("**/*MapperImpl.class")
             }
         }))
@@ -173,7 +182,7 @@ tasks.jacocoTestCoverageVerification {
     violationRules {
         rule {
             limit {
-                minimum = "1.00".toBigDecimal()
+                minimum = "0.90".toBigDecimal()
             }
         }
     }

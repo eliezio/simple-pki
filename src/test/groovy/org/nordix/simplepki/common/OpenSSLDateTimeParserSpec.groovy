@@ -1,6 +1,6 @@
 /*-
  * ============LICENSE_START=======================================================
- *  Copyright (C) 2019 Nordix Foundation.
+ *  Copyright (C) 2019-2022 Nordix Foundation.
  * ================================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ class OpenSSLDateTimeParserSpec extends Specification {
     @Unroll
     def 'converts OpenSSL date/time format to Epoch millis: #dtSpec'() {
         expect:
-            OpenSSLDateTimeParser.parse(dtSpec).get() == expectedMillis
+            OpenSSLDateTimeParser.parse(dtSpec) == expectedMillis
 
         where:
             // expected values calculated using https://www.epochconverter.com
@@ -40,7 +40,7 @@ class OpenSSLDateTimeParserSpec extends Specification {
     @Unroll
     def 'dont convert if not formatted with OpenSSL date/time format: #dtSpec'() {
         expect:
-            !OpenSSLDateTimeParser.parse(dtSpec).isPresent()
+            OpenSSLDateTimeParser.parse(dtSpec) == null
 
         where:
             // expected values calculated using https://www.epochconverter.com
