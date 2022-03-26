@@ -69,4 +69,4 @@ If using Gradle, run:
 
 == License
 
-Copyright (C) 2019 Nordix Foundation.
+Copyright (C) 2019-2022 Nordix Foundation.

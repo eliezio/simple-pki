@@ -1,6 +1,6 @@
 /*-
  * ============LICENSE_START=======================================================
- *  Copyright (C) 2019 Nordix Foundation.
+ *  Copyright (C) 2019-2022 Nordix Foundation.
  * ================================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import com.epages.restdocs.apispec.ResourceSnippetParameters
 import com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import groovy.sql.Sql
 import io.restassured.RestAssured
 import io.restassured.builder.RequestSpecBuilder
@@ -125,7 +126,9 @@ class PkiRestControllerSpec extends BaseSpecification {
     Instant crlLastUpdate
 
     @Shared
-    ObjectMapper mapper = new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+    ObjectMapper mapper = new ObjectMapper()
+        .registerModule(new KotlinModule.Builder().build())
+        .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
 
     @Autowired
     DataSource dataSource
@@ -338,9 +341,9 @@ class PkiRestControllerSpec extends BaseSpecification {
         and: 'An X-Cert-Serial-Number header was sent'
             response.getHeader('X-Cert-Serial-Number') == serialNumberStr
         and: 'A corresponding EndEntity for the new certificate was correctly persisted on DB'
-            def expectedEntity = new EndEntity(serialNumber: serialNumber, version: 0,
-                subject: 'CN=localhost,OU=ESY,O=Nordix Foundation,L=Athlone,C=IE',
-                notValidBefore: cert.notBefore, notValidAfter: cert.notAfter, certificate: response.body().asString())
+            def expectedEntity = new EndEntity(serialNumber, 0,
+                'CN=localhost,OU=ESY,O=Nordix Foundation,L=Athlone,C=IE',
+                cert.notBefore, cert.notAfter, response.body().asString(), null, 0)
             def entity = fetchCertificateEntity(serialNumber)
             entity == expectedEntity
         and: 'The POST event was logged'
@@ -476,9 +479,9 @@ class PkiRestControllerSpec extends BaseSpecification {
         and: 'An X-Cert-Serial-Number header was sent'
             response.getHeader('X-Cert-Serial-Number') == serialNumberStr
         and: 'The corresponding EndEntity was persisted on DB'
-            def expectedEntity = new EndEntity(serialNumber: serialNumber, version: 0,
-                subject: 'CN=localhost,OU=ESY,O=Nordix Foundation,L=Athlone,C=IE',
-                notValidBefore: cert.notBefore, notValidAfter: cert.notAfter, certificate: response.body().asString())
+            def expectedEntity = new EndEntity(serialNumber, 0,
+                'CN=localhost,OU=ESY,O=Nordix Foundation,L=Athlone,C=IE',
+                cert.notBefore, cert.notAfter, response.body().asString(), null, 0)
             def entity = fetchCertificateEntity(serialNumber)
             entity == expectedEntity
     }
@@ -503,14 +506,14 @@ class PkiRestControllerSpec extends BaseSpecification {
     }
 
     EndEntity updateCertificateEntity(EndEntity source, Date revocationDate, int revokedReason) {
-        return new EndEntity(serialNumber: source.serialNumber,
-            version: source.version + 1,
-            subject: source.subject,
-            notValidBefore: source.notValidBefore,
-            notValidAfter: source.notValidAfter,
-            certificate: source.certificate,
-            revocationDate: revocationDate,
-            revokedReason: revokedReason
+        return new EndEntity(source.serialNumber,
+            source.version + 1,
+            source.subject,
+            source.notValidBefore,
+            source.notValidAfter,
+            source.certificate,
+            revocationDate,
+            revokedReason
         )
     }
 
