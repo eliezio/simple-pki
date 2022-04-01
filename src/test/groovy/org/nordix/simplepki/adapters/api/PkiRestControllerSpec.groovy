@@ -42,7 +42,6 @@ import org.nordix.simplepki.application.BaseSpecification
 import org.nordix.simplepki.domain.model.EndEntity
 import org.nordix.simplepki.domain.model.PkiOperations
 import org.nordix.simplepki.domain.model.SerialNumberConverter
-import org.nordix.simplepki.application.port.out.PkiEntityRepository
 import org.spockframework.spring.SpringSpy
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs
@@ -53,7 +52,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.restdocs.RestDocumentationContextProvider
 import org.springframework.restdocs.RestDocumentationExtension
-import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.TestPropertySource
 import spock.lang.AutoCleanup
 import spock.lang.Shared
@@ -103,9 +101,6 @@ class PkiRestControllerSpec extends BaseSpecification {
 
     @LocalServerPort
     int localPort
-
-    @SpringSpy
-    PkiEntityRepository spiedKeyStoreRepository
 
     @SpringSpy
     PkiOperations spiedPkiOperations
@@ -162,21 +157,6 @@ class PkiRestControllerSpec extends BaseSpecification {
             .addFilter(new RequestLoggingFilter())
             .addFilter(new ResponseLoggingFilter())
             .build()
-    }
-
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
-    def 'server is unavailable caused by a failure on opening keystore'() {
-        when: 'Request for the CA certificate - the simplest service available'
-            def response = given(this.documentationSpec)
-                .accept(APPLICATION_X_PEM_FILE)
-                .when()
-                .get("/pki/v1/cacert")
-                .andReturn()
-
-        then: 'Server fails, reporting a SC=500'
-            response.statusCode == SC_INTERNAL_SERVER_ERROR
-        and: 'KeyStore I/O failure caused this error'
-            1 * spiedKeyStoreRepository.load() >> { throw new Exception('Failed to open file') }
     }
 
     def 'report OK for #uri service'() {

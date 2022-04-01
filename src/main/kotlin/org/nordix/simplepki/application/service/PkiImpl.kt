@@ -36,18 +36,16 @@ import java.security.SecureRandom
 import java.security.cert.X509CRL
 import java.security.cert.X509Certificate
 import java.util.*
-import javax.inject.Provider
 
 @Component
 internal class PkiImpl(
-    // Using Provider<> to allow lazily fetching the CA singleton
-    private val ca: Provider<PkiEntity>,
+    private val ca: PkiEntity,
     private val endEntityRepository: EndEntityRepository,
     private val pkiOperations: PkiOperations,
 ) : Pki {
 
     override val caCert: X509Certificate
-        get() = ca.get().certificate
+        get() = ca.certificate
 
     override fun crlBuilder(): Pki.CrlBuilder {
         return CrlBuilderImpl(endEntityRepository.allRevocations())
@@ -55,7 +53,7 @@ internal class PkiImpl(
 
     override fun sign(csr: PKCS10CertificationRequest): X509Certificate {
         val serialNumber = secureRandom.nextLong() and Long.MAX_VALUE
-        val cert: X509Certificate = pkiOperations.signCsr(csr, serialNumber, ca.get())
+        val cert: X509Certificate = pkiOperations.signCsr(csr, serialNumber, ca)
         val entity = EndEntity(
             serialNumber = serialNumber,
             version = 0,
@@ -110,7 +108,7 @@ internal class PkiImpl(
         init {
             this.revocations = revocations
             this.editionDate = revocations.maxOfOrNull { it.date }
-                ?: ca.get().certificate.notBefore
+                ?: ca.certificate.notBefore
         }
 
         override fun editionTime(): Long =
@@ -125,7 +123,7 @@ internal class PkiImpl(
             pkiOperations.generateCrl(
                 revocations,
                 editionDate,
-                ca.get()
+                ca
             )
     }
 
