@@ -32,7 +32,7 @@ plugins {
     id("com.epages.restdocs-api-spec") version "0.16.2"
     id("org.asciidoctor.jvm.convert") version "3.3.2"
 
-    id("com.google.cloud.tools.jib") version "1.3.0"
+    id("com.google.cloud.tools.jib") version "3.3.0"
 }
 
 apply(plugin = "io.spring.dependency-management")
@@ -284,7 +284,7 @@ jib {
             .joinToString("/")
     }
     extraDirectories {
-        permissions = mapOf("/usr/local/bin/wait-for" to "755")
+        permissions.set(mapOf("/usr/local/bin/wait-for" to "755"))
     }
     container {
         jvmFlags = listOf(
