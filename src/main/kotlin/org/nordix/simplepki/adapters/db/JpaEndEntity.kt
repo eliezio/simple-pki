@@ -20,7 +20,11 @@
 package org.nordix.simplepki.adapters.db
 
 import java.util.*
-import javax.persistence.*
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.Id
+import javax.persistence.Table
+import javax.persistence.Version
 
 @Entity
 @Table(name = "END_ENTITY")
@@ -36,6 +40,6 @@ data class JpaEndEntity (
 
     @Column(length = 4096)
     val certificate: String,
-    val revocationDate: Date? = null,
-    val revokedReason: Int = 0,
+    val revocationDate: Date?,
+    val revokedReason: Int,
 )

@@ -20,25 +20,21 @@
 package org.nordix.simplepki.application.service
 
 import org.bouncycastle.asn1.x509.Extension
-import org.nordix.simplepki.domain.model.PkiOperations
-import kotlin.Throws
-import org.nordix.simplepki.domain.model.PkiEntity
-import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest
+import org.bouncycastle.cert.X509v2CRLBuilder
+import org.bouncycastle.cert.jcajce.JcaX500NameUtil
+import org.bouncycastle.cert.jcajce.JcaX509CRLConverter
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
 import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder
-import org.bouncycastle.cert.jcajce.JcaX500NameUtil
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
-import org.bouncycastle.operator.OperatorCreationException
-import java.security.cert.CRLException
-import org.nordix.simplepki.domain.model.RevocationEntry
-import java.security.cert.X509CRL
-import org.bouncycastle.cert.X509v2CRLBuilder
-import org.bouncycastle.cert.jcajce.JcaX509CRLConverter
 import org.bouncycastle.pkcs.PKCS10CertificationRequest
+import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest
+import org.nordix.simplepki.domain.model.PkiEntity
+import org.nordix.simplepki.domain.model.PkiOperations
+import org.nordix.simplepki.domain.model.RevocationEntry
 import org.springframework.stereotype.Component
-import java.lang.Exception
 import java.math.BigInteger
+import java.security.cert.X509CRL
 import java.security.cert.X509Certificate
 import java.time.Clock
 import java.util.*
@@ -46,7 +42,6 @@ import java.util.*
 @Component
 internal class BasicPkiOperations(private val clock: Clock) : PkiOperations {
 
-    @Throws(Exception::class)
     override fun signCsr(csr: PKCS10CertificationRequest, serialNumber: Long, ca: PkiEntity): X509Certificate {
         val now = Date.from(clock.instant())
         val jcaRequest = JcaPKCS10CertificationRequest(csr)
@@ -75,7 +70,6 @@ internal class BasicPkiOperations(private val clock: Clock) : PkiOperations {
             .getCertificate(certificateBuilder.build(signer))
     }
 
-    @Throws(OperatorCreationException::class, CRLException::class)
     override fun generateCrl(revocations: List<RevocationEntry>, editionDate: Date, ca: PkiEntity): X509CRL {
         val crlBuilder = X509v2CRLBuilder(JcaX500NameUtil.getSubject(ca.certificate), editionDate)
         for (entry in revocations) {

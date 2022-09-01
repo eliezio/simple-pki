@@ -29,13 +29,18 @@ object OpenSSLDateTimeParser {
 
     private val OPENSSL_DATE_TIME2: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM dd HH:mm:ss yyyy z")
 
+    private const val DOM_TENTHS_POSITION = 4
+
     @JvmStatic
     fun parse(value: String): Long? {
         return try {
-            val formatter: DateTimeFormatter = if (value[4] == ' ') OPENSSL_DATE_TIME1 else OPENSSL_DATE_TIME2
+            val formatter: DateTimeFormatter = when {
+                value[DOM_TENTHS_POSITION] == ' ' -> OPENSSL_DATE_TIME1
+                else -> OPENSSL_DATE_TIME2
+            }
             val temporal: TemporalAccessor = formatter.parse(value)
             Instant.from(temporal).toEpochMilli()
-        } catch (e: RuntimeException) {
+        } catch (_: Exception) {
             null
         }
     }

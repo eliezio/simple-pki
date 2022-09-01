@@ -28,12 +28,12 @@ import javax.servlet.http.HttpServletResponse
 internal class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException::class)
-    protected fun handleIllegalArgumentException(ex: IllegalArgumentException, response: HttpServletResponse) {
+    fun handleIllegalArgumentException(ex: IllegalArgumentException, response: HttpServletResponse) {
         response.sendError(HttpStatus.BAD_REQUEST.value(), ex.message)
     }
 
     @ExceptionHandler(NoSuchElementException::class)
-    protected fun handleNoSuchElementException(ex: NoSuchElementException, response: HttpServletResponse) {
+    fun handleNoSuchElementException(ex: NoSuchElementException, response: HttpServletResponse) {
         response.sendError(HttpStatus.NOT_FOUND.value(), ex.message)
     }
 }

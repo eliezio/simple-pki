@@ -19,15 +19,17 @@
  */
 package org.nordix.simplepki.adapters.api
 
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
+import javax.servlet.http.HttpServletResponse
 
 @RestController
 internal class BasicRestController {
 
-    // TODO: replace by /actuator/info
     @GetMapping(path = ["/healthz"])
-    fun healthCheck() {
-        // no need to return any payload
+    fun healthCheck(response: HttpServletResponse) {
+        response.setHeader("Location", "/actuator/health")
+        response.status = HttpStatus.FOUND.value()
     }
 }

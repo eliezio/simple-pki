@@ -37,12 +37,12 @@ data class EndEntity(
         get() = revocationDate != null
 
     fun revocationEntry(): RevocationEntry? {
-        return if (isRevoked)
+        return revocationDate?.let { date ->
             RevocationEntry(
                 serialNumber,
-                revocationDate,
+                date,
                 revokedReason
             )
-        else null
+        }
     }
 }
