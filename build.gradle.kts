@@ -53,7 +53,7 @@ val scmProject = "simple-pki"
 val mainClassName = "org.nordix.simplepki.Application"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
 }
 
 configurations {
@@ -65,6 +65,7 @@ configurations {
 val restdocsApiSpecVersion: String by project
 
 val bouncyCastleVersion = "1.70"
+val mapstructVersion = "1.5.2.Final"
 val spockFrameworkVersion = "2.2-groovy-3.0"
 val spockReportsVersion = "2.3.1-groovy-3.0"
 
@@ -79,6 +80,9 @@ dependencies {
 
     asciidoctorExt("org.springframework.restdocs", "spring-restdocs-asciidoctor")
 
+    implementation("org.mapstruct:mapstruct:$mapstructVersion")
+    annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
+
     implementation("javax.inject", "javax.inject", "1")
     implementation("org.springframework.boot", "spring-boot-starter")
     implementation("org.springframework.boot", "spring-boot-starter-web") {
@@ -86,6 +90,7 @@ dependencies {
     }
     implementation("org.springframework.boot", "spring-boot-starter-undertow")
     implementation("org.springframework.boot", "spring-boot-starter-data-jpa")
+    implementation("org.hibernate.validator:hibernate-validator")
 
     implementation("org.bouncycastle", "bcprov-jdk15on", bouncyCastleVersion)
     implementation("org.bouncycastle", "bcpkix-jdk15on", bouncyCastleVersion)
@@ -93,6 +98,7 @@ dependencies {
     runtimeOnly("com.h2database", "h2")
     runtimeOnly("mysql", "mysql-connector-java")
 
+    testImplementation("com.tngtech.archunit:archunit-junit5:0.23.1")
     testImplementation("org.springframework.boot", "spring-boot-starter-test")
     testImplementation(platform("org.spockframework:spock-bom:$spockFrameworkVersion"))
     testImplementation("org.spockframework:spock-core")
@@ -112,6 +118,13 @@ file(docsDir).mkdirs()
 val snippetsDir = "$buildDir/generated-snippets"
 val publicReportsDir = "public"
 val pitestReportsDir = "$publicReportsDir/pitest"
+
+tasks.compileJava {
+    options.compilerArgs.addAll(listOf(
+        "-Amapstruct.suppressGeneratorTimestamp=true",
+        "-Amapstruct.suppressGeneratorVersionInfoComment=true",
+    ))
+}
 
 /*
  * All Archives
@@ -159,7 +172,7 @@ tasks.jacocoTestCoverageVerification {
     violationRules {
         rule {
             limit {
-                minimum = "0.90".toBigDecimal()
+                minimum = "1.00".toBigDecimal()
             }
         }
     }
@@ -227,6 +240,15 @@ configure<com.epages.restdocs.apispec.gradle.OpenApi3Extension> {
 /*
  * SpringBoot packaging
  */
+tasks.bootJar {
+    manifest {
+        attributes(mapOf(
+            "Implementation-Title" to project.name,
+            "Implementation-Version" to project.version,
+        ))
+    }
+}
+
 springBoot {
     // to create META-INF/build-info.properties. Its contents are exported by /info
     buildInfo {
@@ -346,6 +368,7 @@ val greenHue = 120.0 / 360.0
 val saturation = 0.9
 val brightness = 0.9
 
+// TODO: move to buildSrc
 tasks.register("writePitestShieldsJson") {
     doLast {
         val doc: Document = Jsoup.parse(File("$pitestReportsDir/index.html"), "ASCII")

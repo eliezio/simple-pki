@@ -110,7 +110,7 @@ You must provide the same serial number reported on the response header for the 
 Alternatively, you can extract the certificate's serial number by using OpenSSL CLI as follows:
 [source,subs="normal"]
 ----
-$ openssl x509 -in __cert.pem__ -text -noout | grep "Serial Number:"
+$ openssl x509 -in __cert.pem__ -serial -noout
 ----
 ****
 
