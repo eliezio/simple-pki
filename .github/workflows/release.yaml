@@ -1,0 +1,66 @@
+---
+name: Release
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Release Please
+        uses: google-github-actions/release-please-action@v3
+        id: release
+        with:
+          release-type: simple
+          pull-request-title-pattern: "chore: Release ${version}"
+          changelog-types: >
+            [
+              { "type": "feat", "section": "⭐ New Features", "hidden": false },
+              { "type": "fix", "section": "🐞 Bug Fixes", "hidden": false },
+              { "type": "refactor", "section": "🚧 Refactor", "hidden": false },
+              { "type": "perf", "section": "🚀 Performance Improvement", "hidden": false },
+              { "type": "docs", "section": "📖 Documentations", "hidden": false },
+              { "type": "ci", "section": "🚇 Continuous Integration", "hidden": false },
+              { "type": "build", "section": "🏗️ Build System", "hidden": true },
+              { "type": "test", "section": "🚨️ Testing", "hidden": true },
+              { "type": "style", "section": "🎨 Style", "hidden": true },
+              { "type": "chore", "section": "🔧 Chore", "hidden": true }
+            ]
+          extra-files: |
+            README.adoc
+            k8s/rcserver.yaml
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+        if: ${{ steps.release.outputs.release_created }}
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 11
+          cache: 'gradle'
+        if: ${{ steps.release.outputs.release_created }}
+
+      - name: Set artifact version
+        if: ${{ steps.release.outputs.release_created }}
+        run: |
+          VERSION=${{ steps.release.outputs.tag_name }}
+          echo "RELEASE_VERSION=${VERSION#v}" >> $GITHUB_ENV
+
+      - name: Build and publish container image
+        if: ${{ steps.release.outputs.release_created }}
+        run: |
+          ./gradlew clean :server:jib \
+          --no-daemon --info --stacktrace \
+          -Pversion="${{ env.RELEASE_VERSION }}" \
+          -Djib.from.platforms=linux/amd64,linux/arm64 \
+          -Djib.to.image=ghcr.io/oscar-ng/rcserver:${{ env.RELEASE_VERSION }} \
+          -Djib.to.auth.username=${{ secrets.CR_USERNAME }} \
+          -Djib.to.auth.password=${{ secrets.CR_PAT }}
+...
