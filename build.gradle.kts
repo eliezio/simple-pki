@@ -47,10 +47,12 @@ apply(plugin = "io.spring.dependency-management")
 
 description = "Simple-PKI API"
 group = "org.nordix"
-version = grgit.describe(mapOf(
-    "tags" to true,
-    "always" to true,
-)).removePrefix("v")
+if (version == "unspecified") {
+    version = grgit.describe(mapOf(
+        "tags" to true,
+        "always" to true,
+    )).removePrefix("v")
+}
 println("version: $version")
 
 val defaultDockerGroup = "ebo"
