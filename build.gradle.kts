@@ -275,11 +275,10 @@ val dockerRegistry: String? by project
 
 jib {
     from {
-        // Smaller than the default gcr/distroless/java
-        image = "openjdk:8-jre-alpine"
+        image = "amazoncorretto:11"
     }
     to {
-        val tagVersion = version.toString().substringBefore('-')
+        val tagVersion = version.toString()
         image = listOfNotNull(dockerRegistry, dockerGroup ?: defaultDockerGroup, "${project.name}:$tagVersion")
             .joinToString("/")
     }
@@ -288,9 +287,6 @@ jib {
     }
     container {
         jvmFlags = listOf(
-                "-noverify",
-                "-XX:+UnlockExperimentalVMOptions",
-                "-XX:+UseCGroupMemoryLimitForHeap",
                 // See http://www.thezonemanager.com/2015/07/whats-so-special-about-devurandom.html
                 "-Djava.security.egd=file:/dev/./urandom"
         )
