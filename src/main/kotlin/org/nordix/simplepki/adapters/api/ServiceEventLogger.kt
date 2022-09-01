@@ -21,7 +21,10 @@ package org.nordix.simplepki.adapters.api
 
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import javax.servlet.*
+import javax.servlet.Filter
+import javax.servlet.FilterChain
+import javax.servlet.ServletRequest
+import javax.servlet.ServletResponse
 import javax.servlet.annotation.WebFilter
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse

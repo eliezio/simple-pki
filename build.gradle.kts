@@ -33,6 +33,7 @@ plugins {
     id("info.solidsoft.pitest") version "1.9.0"
 
     // Quality / Documentation Plugins
+    id("io.gitlab.arturbosch.detekt") version "1.21.0"
     id("org.sonarqube") version "3.4.0.2513"
     id("com.adarshr.test-logger") version "3.2.0"
     id("com.github.ksoichiro.console.reporter") version "0.6.3"
@@ -88,6 +89,7 @@ dependencies {
         exclude(module = "spring-boot-starter-tomcat")
     }
     implementation("org.springframework.boot", "spring-boot-starter-undertow")
+    implementation("org.springframework.boot", "spring-boot-starter-actuator")
     implementation("org.springframework.boot", "spring-boot-starter-data-jpa")
     implementation("org.hibernate.validator:hibernate-validator")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")

@@ -21,8 +21,8 @@ package org.nordix.simplepki.domain.model
 
 import java.util.*
 
-data class RevocationEntry (
-    var serialNumber: Long = 0,
-    var date: Date? = null,
-    var reason: Int = 0,
+data class RevocationEntry(
+    val serialNumber: Long,
+    val date: Date,
+    val reason: Int,
 )

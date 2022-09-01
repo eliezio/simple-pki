@@ -25,19 +25,16 @@ import org.bouncycastle.openssl.PEMParser
 import org.bouncycastle.openssl.jcajce.JcaMiscPEMGenerator
 import org.bouncycastle.util.io.pem.PemWriter
 import java.io.ByteArrayOutputStream
-import java.io.IOException
 import java.io.OutputStreamWriter
 import java.io.Reader
 import java.nio.charset.StandardCharsets
-import java.security.cert.CertificateException
 import java.security.cert.X509Certificate
+import java.util.*
 
 object PemConverter {
 
-    // TODO: it's not really generic. Only works for X509Certificate
     @Suppress("UNCHECKED_CAST")
     @JvmStatic
-    @Throws(IOException::class, CertificateException::class)
     fun <T> fromPem(reader: Reader, clazz: Class<T>): T {
         val pemParser = PEMParser(reader)
         val obj: Any = pemParser.readObject() ?: throw IllegalArgumentException("No PEM data was found")
@@ -48,16 +45,14 @@ object PemConverter {
             return JcaX509CertificateConverter().getCertificate(obj as X509CertificateHolder) as T
         }
         throw IllegalArgumentException(
-            String.format(
+            String.format(Locale.getDefault(Locale.Category.FORMAT),
                 "An %s object was expected, whereas a %s object was found",
                 clazz.simpleName, obj.javaClass.simpleName
             )
         )
     }
 
-    // TODO: is its usage really generic?
     @JvmStatic
-    @Throws(IOException::class)
     fun toPem(obj: Any): String {
         val baos = ByteArrayOutputStream()
         PemWriter(OutputStreamWriter(baos, StandardCharsets.US_ASCII)).use { writer ->

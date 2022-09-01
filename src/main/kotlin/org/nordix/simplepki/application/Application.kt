@@ -37,6 +37,7 @@ import java.security.Security
 @EnableConfigurationProperties(KeyStoreConfig::class)
 class Application
 
+@Suppress("SpreadOperator")
 fun main(args: Array<String>) {
     bouncyCastleInitialize()
     SpringApplication.run(Application::class.java, *args)

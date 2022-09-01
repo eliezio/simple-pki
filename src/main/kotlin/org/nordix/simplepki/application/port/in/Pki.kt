@@ -20,13 +20,9 @@
 package org.nordix.simplepki.application.port.`in`
 
 import org.bouncycastle.pkcs.PKCS10CertificationRequest
-import java.io.IOException
-import java.lang.Exception
-import java.security.cert.CertificateException
 import java.security.cert.X509CRL
 import java.security.cert.X509Certificate
 import java.util.*
-import java.util.function.LongPredicate
 
 interface Pki {
 
@@ -34,13 +30,10 @@ interface Pki {
 
     fun crlBuilder(): CrlBuilder
 
-    @Throws(Exception::class)
     fun sign(csr: PKCS10CertificationRequest): X509Certificate
 
-    @Throws(CertificateException::class, IOException::class)
     fun getCertificate(serialNumber: String): X509Certificate
 
-    @Throws(CertificateException::class, IOException::class)
     fun getCertificate(serialNumber: Long): X509Certificate
 
     fun revoke(serialNumber: String, date: Date): Boolean
@@ -48,9 +41,8 @@ interface Pki {
     fun revoke(serialNumber: Long, date: Date): Boolean
 
     interface CrlBuilder {
-        fun filterByUpdateTime(predicate: LongPredicate): CrlBuilder
+        fun editionTime(): Long
 
-        @Throws(Exception::class)
-        fun build(): Optional<X509CRL>
+        fun build(): X509CRL
     }
 }

@@ -29,9 +29,7 @@ import java.security.cert.X509Certificate
  *  1. End-Entity (aka Non-CA).
  *
  */
-data class PkiEntity (
-
-    var privateKey: PrivateKey,
-
-    var certificate: X509Certificate,
+data class PkiEntity(
+    val privateKey: PrivateKey,
+    val certificate: X509Certificate,
 )

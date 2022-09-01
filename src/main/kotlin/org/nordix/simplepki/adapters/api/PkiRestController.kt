@@ -27,10 +27,14 @@ import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.context.request.ServletWebRequest
 import java.io.Reader
-import java.security.cert.X509CRL
 import java.time.Clock
 import java.util.*
 import javax.validation.constraints.Pattern
@@ -51,32 +55,28 @@ internal class PkiRestController(
     }
 
     @GetMapping("/crl")
-    @Throws(Exception::class)
     fun getCrl(swr: ServletWebRequest): ResponseEntity<String> {
-        val crl: X509CRL = pki.crlBuilder()
-            .filterByUpdateTime { lastModifiedTimestamp: Long ->
-                swr.checkNotModified(lastModifiedTimestamp)
-            }
-            .build()
-            .orElseThrow { ResourceNotModifiedException() }
+        val crlBuilder = pki.crlBuilder()
+        if (swr.checkNotModified(crlBuilder.editionTime())) {
+            throw ResourceNotModifiedException()
+        }
+        val crl = crlBuilder.build()
         return attachmentBuilder("crl.pem", APPLICATION_X_PEM_FILE)
             .lastModified(crl.thisUpdate.toInstant())
             .body(PemConverter.toPem(crl))
     }
 
     @PostMapping("/certificates")
-    @Throws(Exception::class)
     fun issueCertificate(csrReader: Reader): ResponseEntity<String> {
         val request =
             PemConverter.fromPem(csrReader, PKCS10CertificationRequest::class.java)
         val cert = pki.sign(request)
         return attachmentBuilder("cert.pem", APPLICATION_X_PEM_FILE)
-            .header("X-Cert-Serial-Number", SerialNumberConverter.toString(cert.getSerialNumber()))
+            .header("X-Cert-Serial-Number", SerialNumberConverter.toString(cert.serialNumber))
             .body(PemConverter.toPem(cert))
     }
 
     @GetMapping("/certificates/{serialNumber}")
-    @Throws(Exception::class)
     fun getCertificate(
         @PathVariable serialNumber: @Pattern(regexp = SerialNumberConverter.REGEXP) String
     ): ResponseEntity<String> {

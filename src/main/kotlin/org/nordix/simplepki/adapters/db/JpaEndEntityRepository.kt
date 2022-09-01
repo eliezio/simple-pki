@@ -31,15 +31,17 @@ internal class JpaEndEntityRepository(
 ) : EndEntityRepository {
 
     override fun findById(serialNumber: Long): Optional<EndEntity> {
-        return repository.findById(serialNumber).map { jpaEndEntity: JpaEndEntity ->
-            EndEntityMapper.INSTANCE.fromJpa(jpaEndEntity)
-        }
+        return repository.findById(serialNumber)
+            .map { jpaEndEntity: JpaEndEntity ->
+                EndEntityMapper.INSTANCE.fromJpa(jpaEndEntity)
+            }
     }
 
     override fun allRevocations(): List<RevocationEntry> {
-        return repository.findAll().mapNotNull { entry ->
-            EndEntityMapper.INSTANCE.fromJpa(entry).revocationEntry()
-        }
+        return repository.findAll()
+            .mapNotNull { entry ->
+                EndEntityMapper.INSTANCE.fromJpa(entry).revocationEntry()
+            }
     }
 
     override fun save(entity: EndEntity) {

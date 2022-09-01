@@ -35,7 +35,7 @@ internal class PkiEntityKeyStoreRepository(
     override fun load(): PkiEntity {
         val ks = KeyStore.getInstance(config.type)
         config.resource.inputStream.use {
-                ks.load(it, config.storepass.toCharArray())
+            ks.load(it, config.storepass.toCharArray())
         }
         val caKey = ks.getKey(config.alias, config.keypass.toCharArray()) as PrivateKey
         return PkiEntity(caKey, ks.getCertificate(config.alias) as X509Certificate)
