@@ -25,7 +25,7 @@ plugins {
     kotlin("plugin.spring") version kotlinVersion
     kotlin("plugin.jpa") version kotlinVersion
 
-    id("org.springframework.boot") version "2.7.3"
+    id("org.springframework.boot") version "2.7.4"
 
     id("org.ajoberstar.grgit") version "5.0.0"
     id("com.github.ben-manes.versions") version "0.42.0"
