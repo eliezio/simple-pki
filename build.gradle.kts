@@ -71,7 +71,7 @@ val restdocsApiSpecVersion: String by project
 
 val bouncyCastleVersion = "1.70"
 val mapstructVersion = "1.5.3.Final"
-val spockFrameworkVersion = "2.2-groovy-3.0"
+val spockFrameworkVersion = "2.3-groovy-3.0"
 val spockReportsVersion = "2.3.1-groovy-3.0"
 
 repositories {
