@@ -11,6 +11,7 @@ buildscript {
     dependencies {
         classpath("org.apache.commons:commons-text:1.10.0")
         classpath("org.jsoup", "jsoup", "1.15.3")
+        classpath("com.github.gundy", "semver4j", "0.16.4")
     }
 }
 
