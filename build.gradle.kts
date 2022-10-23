@@ -4,7 +4,6 @@ import org.apache.commons.text.StringSubstitutor
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import java.util.function.Predicate
 import kotlin.math.floor
 
 buildscript {
@@ -331,34 +330,6 @@ tasks.jibDockerBuild {
  * ben-manes.versions
  */
 
-val upgradesToIgnore = listOf(
-    "ch.qos.logback:*:>\${currentVersionMajor}.\${currentVersionMinor}",
-    "com.h2database:h2:>\${currentVersionMajor}",
-    "org.hibernate.validator:hibernate-validator:>\${currentVersionMajor}",
-    "io.rest-assured:rest-assured:>\${currentVersionMajor}",
-)
-
-fun toModulePredicate(moduleSpec: String, currentVersion: String): Predicate<ModuleComponentIdentifier> {
-    val (group, module, version) = moduleSpec.split(':')
-    val currentVersionRange: String by lazy {
-        val currentVersionObject = Version.fromString(currentVersion)
-        StringSubstitutor.replace(
-            version,
-            mapOf(
-                "currentVersionMajor" to currentVersionObject.major,
-                "currentVersionMinor" to currentVersionObject.minor,
-                "currentVersionPatch" to currentVersionObject.patch,
-            )
-        )
-    }
-
-    return Predicate {
-        (it.group == group)
-                && ((module == "*") || (it.module == module))
-                && SemVer.satisfies(it.version, currentVersionRange)
-    }
-}
-
 val nonStableRegex by lazy {
     "([\\.-](alpha|beta|ea|m|preview|rc)[\\.-]?\\d*(-groovy-\\d+\\.\\d+)?|-b\\d+\\.\\d+)$".toRegex(RegexOption.IGNORE_CASE)
 }
@@ -367,13 +338,41 @@ fun isNonStable(version: String): Boolean {
     return nonStableRegex.containsMatchIn(version)
 }
 
+val upgradesToIgnore = listOf(
+    "ch.qos.logback:*:>\${currentVersionMajor}.\${currentVersionMinor}",
+    "com.h2database:h2:>\${currentVersionMajor}",
+    "org.hibernate.validator:hibernate-validator:>\${currentVersionMajor}",
+    "io.rest-assured:rest-assured:>\${currentVersionMajor}",
+)
+
+fun moduleMatcher(moduleSpec: String, currentVersion: String): (ModuleComponentIdentifier) -> Boolean {
+    val (group, module, version) = moduleSpec.split(':')
+
+    val currentVersionRange by lazy {
+        Version.fromString(currentVersion).let { versionElements ->
+            StringSubstitutor.replace(
+                version,
+                mapOf(
+                    "currentVersionMajor" to versionElements.major,
+                    "currentVersionMinor" to versionElements.minor,
+                    "currentVersionPatch" to versionElements.patch,
+                )
+            )
+        }
+    }
+
+    return {
+        (it.group == group)
+            && ((module == "*") || (it.module == module))
+            && SemVer.satisfies(it.version, currentVersionRange)
+    }
+}
 
 tasks.dependencyUpdates {
     rejectVersionIf {
         candidate.version.endsWith("-groovy-4.0")
-                || isNonStable(candidate.version)
-                || upgradesToIgnore.map { toModulePredicate(it, currentVersion) }
-            .any { matcher -> matcher.test(candidate) }
+            || isNonStable(candidate.version)
+            || upgradesToIgnore.any { moduleMatcher(it, currentVersion)(candidate) }
     }
 }
 
