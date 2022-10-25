@@ -19,16 +19,20 @@
  */
 package org.nordix.simplepki.application
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.nordix.simplepki.application.port.out.PkiEntityRepository
 import org.nordix.simplepki.domain.model.PkiEntity
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Lazy
+import java.security.Security
 import java.time.Clock
 
-@Configuration
-// Generic exceptions should never be thrown
+@Configuration(proxyBeanMethods = false)
 class ApplicationConfig {
+
+    init {
+        Security.addProvider(BouncyCastleProvider())
+    }
 
     @Bean
     fun clock(): Clock {
@@ -36,7 +40,6 @@ class ApplicationConfig {
     }
 
     @Bean(name = ["ca"])
-    @Lazy
     fun createCa(caRepository: PkiEntityRepository): PkiEntity {
         return caRepository.load()
     }

@@ -17,38 +17,23 @@
  * SPDX-License-Identifier: Apache-2.0
  * ============LICENSE_END=========================================================
  */
-package org.nordix.simplepki.adapters.db
+package org.nordix.simplepki.application
 
-import groovy.sql.Sql
+
 import org.bouncycastle.pkcs.PKCS10CertificationRequest
-import org.nordix.simplepki.application.BaseSpecification
 import org.nordix.simplepki.application.port.in.Pki
 import org.nordix.simplepki.common.PemConverter
 import org.nordix.simplepki.domain.model.PkiOperations
 import org.spockframework.spring.SpringSpy
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.TestPropertySource
-import spock.lang.AutoCleanup
 import spock.lang.Shared
-import spock.lang.Unroll
 
-import javax.sql.DataSource
 import java.time.Clock
 
-@SpringBootTest
-@TestPropertySource(locations = [
-    // In case you need to debug DB-related activities, just define the env var SPRING_PROFILES_ACTIVE=debug
-    'classpath:test-db.properties',
-    'classpath:test-ks.properties'
-])
 class PkiTransactionalSpec extends BaseSpecification {
 
     @Autowired
     Clock clock
-
-    @Autowired
-    DataSource dataSource
 
     @Autowired
     Pki pki
@@ -56,18 +41,11 @@ class PkiTransactionalSpec extends BaseSpecification {
     @SpringSpy
     PkiOperations spiedPkiOperations
 
-    @AutoCleanup
-    Sql sql
-
     @Shared
     PKCS10CertificationRequest csr
 
     def setupSpec() {
         csr = loadCsr('/__data__/client-cert.csr')
-    }
-
-    def setup() {
-        sql = new Sql(dataSource)
     }
 
     def 'generates certificate under normal circumstances'() {
@@ -82,7 +60,6 @@ class PkiTransactionalSpec extends BaseSpecification {
             currentNumberOfEndEntities() == old(currentNumberOfEndEntities()) + 1
     }
 
-    @Unroll
     def 'must rollback the inclusion a new EndEntity when a Pki collaborator fails with #description'() {
         when: 'Attempt to sign the certificate in a transactional context'
             pki.sign(csr)
@@ -99,7 +76,6 @@ class PkiTransactionalSpec extends BaseSpecification {
             description = exceptionClass.getName()
     }
 
-    @Unroll
     def 'must commit #n concurrent inclusions of EndEntity'() {
         when: 'Invoke Pki::sign in multiple threads'
             def threads = (1..n).collect { Thread.start {
@@ -114,11 +90,6 @@ class PkiTransactionalSpec extends BaseSpecification {
 
         where:
             n = 4
-    }
-
-    int currentNumberOfEndEntities() {
-        //noinspection SqlDialectInspection,SqlNoDataSourceInspection
-        return sql.firstRow('SELECT count(1) AS numberOfRows FROM END_ENTITY').numberOfRows
     }
 
     PKCS10CertificationRequest loadCsr(String resourcePath) {

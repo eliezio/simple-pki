@@ -20,11 +20,9 @@
 package org.nordix.simplepki.common
 
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class OpenSSLDateTimeParserSpec extends Specification {
 
-    @Unroll
     def 'converts OpenSSL date/time format to Epoch millis: #dtSpec'() {
         expect:
             OpenSSLDateTimeParser.parse(dtSpec) == expectedMillis
@@ -37,7 +35,6 @@ class OpenSSLDateTimeParserSpec extends Specification {
             'May  2 14:03:27 2019 GMT' | 1556805807000
     }
 
-    @Unroll
     def 'dont convert if not formatted with OpenSSL date/time format: #dtSpec'() {
         expect:
             OpenSSLDateTimeParser.parse(dtSpec) == null

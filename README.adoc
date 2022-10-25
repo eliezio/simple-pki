@@ -14,7 +14,7 @@ ifndef::env-github[]
 endif::[]
 
 = Simple PKI
-Eliézio Oliveira <eliezio.oliveira@est.tech>
+Eliézio Oliveira <eliezio@pm.me>
 v{project-version}
 
 image:https://travis-ci.org/eliezio/simple-pki.svg?branch=master[Build, link="https://travis-ci.org/eliezio/simple-pki"]
