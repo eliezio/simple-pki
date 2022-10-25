@@ -19,7 +19,7 @@
  */
 package org.nordix.simplepki.adapters.api
 
-import org.slf4j.LoggerFactory
+import mu.KotlinLogging
 import org.springframework.stereotype.Component
 import javax.servlet.Filter
 import javax.servlet.FilterChain
@@ -28,6 +28,8 @@ import javax.servlet.ServletResponse
 import javax.servlet.annotation.WebFilter
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
+
+private val logger = KotlinLogging.logger {}
 
 @Component
 @WebFilter("/pki/**")
@@ -38,16 +40,22 @@ internal class ServiceEventLogger : Filter {
         try {
             chain.doFilter(request, response)
         } finally {
-            val req = request as HttpServletRequest
-            val resp = response as HttpServletResponse
-            logger.info(
-                "evt=SERVICE method={} uri={} sc={} elapsed={}", req.method, req.requestURI,
-                resp.status, System.currentTimeMillis() - startTime
-            )
+            logRequest(request, response, startTime)
         }
     }
 
-    companion object {
-        private val logger = LoggerFactory.getLogger(ServiceEventLogger::class.java)
+    private fun logRequest(
+        request: ServletRequest,
+        response: ServletResponse,
+        startTime: Long
+    ) {
+        val req = request as HttpServletRequest
+        if (!req.requestURI.startsWith("/actuator")) {
+            val resp = response as HttpServletResponse
+            logger.info(
+                "evt=SERVICE method={} uri={} sc={} elapsed={}",
+                req.method, req.requestURI, resp.status, System.currentTimeMillis() - startTime
+            )
+        }
     }
 }

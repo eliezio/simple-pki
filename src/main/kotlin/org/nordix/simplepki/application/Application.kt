@@ -19,18 +19,14 @@
  */
 package org.nordix.simplepki.application
 
-import org.bouncycastle.crypto.CryptoServicesRegistrar
-import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.domain.EntityScan
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
-import java.security.SecureRandom
-import java.security.Security
 
-@SpringBootApplication
+@SpringBootApplication(proxyBeanMethods = false)
 @ComponentScan("org.nordix.simplepki")
 @EnableJpaRepositories(basePackages = ["org.nordix.simplepki.adapters.db"])
 @EntityScan(basePackages = ["org.nordix.simplepki.adapters.db"])
@@ -39,11 +35,5 @@ class Application
 
 @Suppress("SpreadOperator")
 fun main(args: Array<String>) {
-    bouncyCastleInitialize()
     SpringApplication.run(Application::class.java, *args)
-}
-
-private fun bouncyCastleInitialize() {
-    Security.addProvider(BouncyCastleProvider())
-    CryptoServicesRegistrar.setSecureRandom(SecureRandom())
 }

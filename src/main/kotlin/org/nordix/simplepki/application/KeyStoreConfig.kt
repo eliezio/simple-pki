@@ -22,18 +22,21 @@ package org.nordix.simplepki.application
 import org.springframework.boot.context.properties.ConstructorBinding
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.core.io.Resource
+import org.springframework.validation.annotation.Validated
+import javax.validation.constraints.NotBlank
 
 /**
  * All configurable parameters required to access a KeyStore.
  */
 @ConstructorBinding
 @ConfigurationProperties(prefix = "app.pki.ks")
+@Validated
 data class KeyStoreConfig (
     val resource: Resource,
 
     // Usually 'jks' or 'pkcs12' (default)
-    val type: String,
-    val alias: String,
-    val storepass: String,
-    val keypass: String,
+    @field:NotBlank val type: String,
+    @field:NotBlank val alias: String,
+    @field:NotBlank val storepass: String,
+    @field:NotBlank val keypass: String,
 )

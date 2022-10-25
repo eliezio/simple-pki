@@ -19,6 +19,7 @@
  */
 package org.nordix.simplepki.application
 
+import groovy.sql.Sql
 import org.bouncycastle.asn1.x509.BasicConstraints
 import org.bouncycastle.asn1.x509.Extension
 import org.bouncycastle.asn1.x509.KeyUsage
@@ -26,28 +27,71 @@ import org.bouncycastle.cert.X509CRLEntryHolder
 import org.bouncycastle.cert.X509CRLHolder
 import org.bouncycastle.cert.X509CertificateHolder
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder
-import org.bouncycastle.crypto.CryptoServicesRegistrar
-import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder
-import org.springframework.test.context.ContextConfiguration
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
+import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.lifecycle.Startables
+import org.testcontainers.utility.DockerImageName
+import spock.lang.AutoCleanup
+import spock.lang.Shared
 import spock.lang.Specification
 
-import java.security.SecureRandom
-import java.security.Security
+import javax.sql.DataSource
 import java.security.cert.X509Certificate
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 import static org.nordix.simplepki.common.PemConverter.fromPem
 
-@ContextConfiguration(classes = [Application.class])
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 class BaseSpecification extends Specification {
 
     static final Date NEVER_EXPIRE_DATE = Date.from(Instant.parse('9999-12-31T23:59:59Z'))
 
-    def setupSpec() {
-        Security.addProvider(new BouncyCastleProvider())
-        CryptoServicesRegistrar.setSecureRandom(new SecureRandom())
+    static def POSTGRESQL_IMAGE_NAME = DockerImageName.parse("postgres:14.4-alpine")
+    static def POSTGRESQL_CONFIG = [
+        fsync: 'off',
+        enable_seqscan: 'off',
+    ]
+
+    @Shared
+    static PostgreSQLContainer POSTGRES = new PostgreSQLContainer(POSTGRESQL_IMAGE_NAME).tap {
+        withReuse(true)
+        withTmpFs(["/var/lib/postgresql/data": "rw"])
+        withCommand("postgres " + POSTGRESQL_CONFIG.collect { "-c ${it.key}=${it.value}"}.join(" "))
+    }
+
+    @DynamicPropertySource
+    static def overrideProps(DynamicPropertyRegistry registry) {
+        Startables.deepStart(POSTGRES).join()
+
+        registry.add("spring.datasource.url") { POSTGRES.jdbcUrl }
+        registry.add("spring.datasource.username") { POSTGRES.username }
+        registry.add("spring.datasource.password") { POSTGRES.password }
+    }
+
+    @AutoCleanup
+    Sql sql
+
+    @Autowired
+    private DataSource dataSource
+
+    @Value("\${spring.jpa.properties.hibernate.default_schema}")
+    String defaultSchema
+
+    def setup() {
+        sql = new Sql(dataSource)
+    }
+
+    int currentNumberOfEndEntities() {
+        //noinspection SqlDialectInspection,SqlNoDataSourceInspection
+        return sql.firstRow("SELECT count(1) AS numberOfRows FROM ${defaultSchema}.end_entity" as String).numberOfRows as int
     }
 
     static X509CertificateHolder decodeCert(byte[] content) {
