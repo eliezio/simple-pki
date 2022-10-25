@@ -40,7 +40,7 @@ import java.time.Clock
 import java.util.*
 
 @Component
-internal class BasicPkiOperations(private val clock: Clock) : PkiOperations {
+internal class DefaultPkiOperations(private val clock: Clock) : PkiOperations {
 
     override fun signCsr(csr: PKCS10CertificationRequest, serialNumber: Long, ca: PkiEntity): X509Certificate {
         val now = Date.from(clock.instant())

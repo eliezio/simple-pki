@@ -15,7 +15,7 @@ Eliézio Oliveira;
 :operation-http-response-title: Example response
 :operation-response-headers-title: Example response headers
 
-Version {project-version}
+Version {gradle-project-version}
 
 The available services provided by the Simple-PKI are documented below.
 

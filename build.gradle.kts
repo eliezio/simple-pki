@@ -2,15 +2,13 @@ import com.github.gundy.semver4j.SemVer
 import com.github.gundy.semver4j.model.Version
 import org.apache.commons.text.StringSubstitutor
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import kotlin.math.floor
 
 buildscript {
+    val versions = libs.versions
+
     dependencies {
-        classpath("org.apache.commons:commons-text:1.10.0")
-        classpath("org.jsoup", "jsoup", "1.15.3")
-        classpath("com.github.gundy", "semver4j", "0.16.4")
+        classpath("org.apache.commons", "commons-text", versions.commons.text.get())
+        classpath("com.github.gundy", "semver4j", versions.semver4j.get())
     }
 }
 
@@ -26,6 +24,7 @@ plugins {
     kotlin("plugin.jpa") version kotlinVersion
 
     id("org.springframework.boot") version "2.7.5"
+    id("io.spring.dependency-management") version "1.1.0"
 
     id("org.ajoberstar.grgit") version "5.0.0"
     id("com.github.ben-manes.versions") version "0.43.0"
@@ -34,16 +33,14 @@ plugins {
 
     // Quality / Documentation Plugins
     id("io.gitlab.arturbosch.detekt") version "1.21.0"
-    id("org.sonarqube") version "3.4.0.2513"
+    id("org.sonarqube") version "3.5.0.2730"
     id("com.adarshr.test-logger") version "3.2.0"
     id("com.github.ksoichiro.console.reporter") version "0.6.3"
     id("com.epages.restdocs-api-spec") version "0.16.2"
     id("org.asciidoctor.jvm.convert") version "3.3.2"
 
-    id("com.google.cloud.tools.jib") version "3.3.0"
+    id("com.google.cloud.tools.jib") version "3.3.1"
 }
-
-apply(plugin = "io.spring.dependency-management")
 
 description = "Simple-PKI API"
 group = "org.nordix"
@@ -55,7 +52,7 @@ if (version == "unspecified") {
 }
 println("version: $version")
 
-val defaultDockerGroup = "ebo"
+val defaultDockerGroup = "eliezio"
 val dockerGroup: String? by project
 val scmGroup = "eliezio"
 val scmProject = "simple-pki"
@@ -66,15 +63,17 @@ java {
     sourceCompatibility = JavaVersion.VERSION_11
 }
 
-val restdocsApiSpecVersion: String by project
-
-val bouncyCastleVersion = "1.70"
-val mapstructVersion = "1.5.3.Final"
-val spockFrameworkVersion = "2.3-groovy-3.0"
-val spockReportsVersion = "2.3.1-groovy-3.0"
-
 repositories {
     mavenCentral()
+}
+
+val versions = libs.versions
+
+dependencyManagement {
+    imports {
+        mavenBom("org.spockframework:spock-bom:${versions.spock.bom.get()}")
+        mavenBom("org.testcontainers:testcontainers-bom:${versions.testcontainers.get()}")
+    }
 }
 
 val asciidoctorExt: Configuration by configurations.creating
@@ -82,55 +81,52 @@ val asciidoctorExt: Configuration by configurations.creating
 dependencies {
     asciidoctorExt("org.springframework.restdocs", "spring-restdocs-asciidoctor")
 
-    implementation("org.mapstruct:mapstruct:$mapstructVersion")
-    kapt("org.mapstruct:mapstruct-processor:$mapstructVersion")
+    implementation("org.mapstruct", "mapstruct", versions.mapstruct.get())
+    kapt("org.mapstruct", "mapstruct-processor", versions.mapstruct.get())
 
-    implementation("javax.inject", "javax.inject", "1")
+    implementation("com.fasterxml.jackson.module", "jackson-module-kotlin")
+    implementation("io.github.microutils", "kotlin-logging-jvm", versions.kotlin.logging.get())
+    implementation("org.bouncycastle", "bcpkix-jdk15to18", versions.bouncycastle.get())
+    implementation("org.bouncycastle", "bcprov-jdk15to18", versions.bouncycastle.get())
+    implementation("org.hibernate.validator", "hibernate-validator")
     implementation("org.springframework.boot", "spring-boot-starter")
+    implementation("org.springframework.boot", "spring-boot-starter-actuator")
+    implementation("org.springframework.boot", "spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot", "spring-boot-starter-undertow")
     implementation("org.springframework.boot", "spring-boot-starter-web") {
         exclude(module = "spring-boot-starter-tomcat")
     }
-    implementation("org.springframework.boot", "spring-boot-starter-undertow")
-    implementation("org.springframework.boot", "spring-boot-starter-actuator")
-    implementation("org.springframework.boot", "spring-boot-starter-data-jpa")
-    implementation("org.hibernate.validator:hibernate-validator")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
-    implementation("org.bouncycastle", "bcprov-jdk15on", bouncyCastleVersion)
-    implementation("org.bouncycastle", "bcpkix-jdk15on", bouncyCastleVersion)
+    runtimeOnly("org.postgresql", "postgresql")
+    runtimeOnly("org.flywaydb", "flyway-core")
 
-    runtimeOnly("com.h2database", "h2")
-    runtimeOnly("mysql", "mysql-connector-java")
-
-    testImplementation("com.tngtech.archunit:archunit-junit5:1.0.0")
-    testImplementation("org.springframework.boot", "spring-boot-starter-test")
-    testImplementation(platform("org.spockframework:spock-bom:$spockFrameworkVersion"))
-    testImplementation("org.spockframework:spock-core")
-    testImplementation("org.spockframework:spock-junit4")
-    testImplementation("org.spockframework:spock-spring")
-    testImplementation("org.codehaus.groovy:groovy-sql")
-    testImplementation("io.rest-assured:rest-assured")
-    testImplementation("org.springframework.restdocs", "spring-restdocs-restassured")
-    testImplementation("com.epages", "restdocs-api-spec-restassured", restdocsApiSpecVersion)
     testImplementation("ch.qos.logback", "logback-classic")
+    testImplementation("com.epages", "restdocs-api-spec-restassured", versions.restdocs.apispec.get())
+    testImplementation("com.tngtech.archunit", "archunit-junit5", versions.archunit.get())
+    testImplementation("io.github.hakky54", "logcaptor", versions.logcaptor.get())
+    testImplementation("io.rest-assured", "rest-assured")
+    testImplementation("org.codehaus.groovy", "groovy-sql")
+    testImplementation("org.flywaydb", "flyway-core")
+    testImplementation("org.spockframework", "spock-core")
+    testImplementation("org.spockframework", "spock-spring")
+    testImplementation("org.springframework.boot", "spring-boot-starter-test")
+    testImplementation("org.springframework.restdocs", "spring-restdocs-restassured")
+    testImplementation("org.testcontainers", "junit-jupiter")
+    testImplementation("org.testcontainers", "postgresql")
 
-    testRuntimeOnly("com.athaydes", "spock-reports", spockReportsVersion)
+    testRuntimeOnly("com.athaydes", "spock-reports", versions.spock.reports.get())
 }
 
 val docsDir = "$buildDir/resources/main/static"
 file(docsDir).mkdirs()
 
 val snippetsDir = "$buildDir/generated-snippets"
-val publicReportsDir = "public"
-val pitestReportsDir = "$publicReportsDir/pitest"
 
-tasks.compileJava {
-    options.compilerArgs.addAll(listOf(
-        "-Amapstruct.suppressGeneratorTimestamp=true",
-        "-Amapstruct.suppressGeneratorVersionInfoComment=true",
-    ))
+kapt {
+    arguments {
+        arg("mapstruct.suppressGeneratorTimestamp", "true")
+        arg("mapstruct.suppressGeneratorVersionInfoComment", "true")
+    }
 }
 
 tasks.withType<KotlinCompile> {
@@ -147,6 +143,8 @@ tasks.withType<AbstractArchiveTask> {
     //** reproducible build
     isPreserveFileTimestamps = false
     isReproducibleFileOrder = true
+    dirMode = "755".toInt(radix = 8)
+    fileMode = "644".toInt(radix = 8)
 }
 
 /*
@@ -156,7 +154,7 @@ tasks.withType<Test> {
     useJUnitPlatform()
 
     // faster start-up time
-    jvmArgs("-noverify", "-XX:TieredStopAtLevel=2")
+    jvmArgs("-noverify", "-XX:TieredStopAtLevel=1")
 
     // register this extra output dir
     outputs.dir(snippetsDir)
@@ -172,6 +170,8 @@ tasks.withType<JacocoReportBase> {
             fileTree(it).apply {
                 exclude("**/ApplicationKt.class")
                 exclude("**/*MapperImpl.class")
+                // see https://github.com/MicroUtils/kotlin-logging/wiki/Coverage-reporting
+                exclude("**/*\$logger\$*.class")
             }
         }))
     }
@@ -204,44 +204,39 @@ tasks.check {
  * Pitest
  */
 pitest {
-    pitestVersion.set("1.9.5")
-    junit5PluginVersion.set("0.15")
+    pitestVersion.set("1.9.8")
+    junit5PluginVersion.set("1.1.0")
+    excludedClasses.set(listOf(
+        mainClassName,
+        "org.nordix.simplepki.application.KeyStoreConfig",
+    ))
+    avoidCallsTo.set(listOf(
+        "kotlin.jvm.internal.Intrinsics",
+    ))
+    mutationThreshold.set(97)
     //** reproducible build
     timestampedReports.set(false)
-    excludedClasses.set(setOf(mainClassName))
-    mutationThreshold.set(100)
 }
 
 tasks.pitest {
-    reportDir.set(file(pitestReportsDir))
+    dependsOn(tasks.test)
+
+    finalizedBy("writePitestShieldsJson")
 }
 
 /*
  * Test-Driven Documentation
  */
-val docFilesMap = mapOf("README" to "index")
-
 tasks.asciidoctor {
     dependsOn(tasks.test)
 
     configurations("asciidoctorExt")
     sourceDir("$projectDir/src/docs/asciidoc")
     inputs.dir(snippetsDir)
-    setOutputDir(publicReportsDir)
     baseDirFollowsSourceDir()
-
-    // My way to solve the issue https://github.com/spring-projects/spring-restdocs/issues/562
-    attributes(mapOf("gradle-projectdir" to projectDir.path))
 
     //** reproducible build
     attributes(mapOf("reproducible" to ""))
-
-    doLast {
-        docFilesMap.forEach {
-            file("$publicReportsDir/${it.key}.html")
-                .renameTo(file("$publicReportsDir/${it.value}.html"))
-        }
-    }
 }
 
 configure<com.epages.restdocs.apispec.gradle.OpenApi3Extension> {
@@ -309,9 +304,6 @@ jib {
             .joinToString("/")
     }
     containerizingMode = "packaged"
-    extraDirectories {
-        permissions.set(mapOf("/usr/local/bin/wait-for" to "755"))
-    }
     container {
         jvmFlags = listOf(
                 // See http://www.thezonemanager.com/2015/07/whats-so-special-about-devurandom.html
@@ -340,8 +332,9 @@ fun isNonStable(version: String): Boolean {
 
 val upgradesToIgnore = listOf(
     "ch.qos.logback:*:>\${currentVersionMajor}.\${currentVersionMinor}",
-    "com.h2database:h2:>\${currentVersionMajor}",
+    "org.flywaydb:flyway-core:>\${currentVersionMajor}",
     "org.hibernate.validator:hibernate-validator:>\${currentVersionMajor}",
+    "org.postgresql:postgresql:>\${currentVersionMajor}.\${currentVersionMinor}",
     "io.rest-assured:rest-assured:>\${currentVersionMajor}",
 )
 
@@ -376,66 +369,4 @@ tasks.dependencyUpdates {
     }
 }
 
-/*
- * Pitest shields.io JSON
- */
-val redHue = 0.0
-val greenHue = 120.0 / 360.0
-val saturation = 0.9
-val brightness = 0.9
-
-// TODO: move to buildSrc
-tasks.register("writePitestShieldsJson") {
-    doLast {
-        val doc: Document = Jsoup.parse(File("$pitestReportsDir/index.html"), "ASCII")
-        // WARNING: highly dependent on Pitest version!
-        // The HTML report is the only report that contains the overall result :-(
-        val mutationCoverage = doc.select("html body table:first-of-type tbody tr td:last-of-type div div:last-of-type")[0].text()
-        val values = mutationCoverage.split("/")
-        val ratio = values[0].toFloat() / values[1].toFloat()
-        val powerScale = HSB(redHue + ratio * greenHue, saturation, brightness)
-        val json = buildShieldsJson("Pitest", mutationCoverage, powerScale)
-        File("$pitestReportsDir/shields.json").writeText(json)
-
-    }
-}
-
-tasks.pitest {
-    finalizedBy("writePitestShieldsJson")
-}
-
-@Suppress("FunctionName")
-fun HSBtoRGB(hsb: HSB): RGB {
-    val h = (hsb.hue - floor(hsb.hue)) * 6.0
-    val f = h - floor(h)
-    val b = scaleTo255(hsb.brightness)
-    val m = scaleTo255(hsb.brightness * (1.0 - hsb.saturation))
-    val t = scaleTo255(hsb.brightness * (1.0 - hsb.saturation * (1.0 - f)))
-    val q = scaleTo255(hsb.brightness * (1.0 - hsb.saturation * f))
-    return when (h.toInt()) {
-        0 -> RGB(b, t, m)
-        1 -> RGB(q, b, m)
-        2 -> RGB(m, b, t)
-        3 -> RGB(m, q, b)
-        4 -> RGB(t, m, b)
-        else -> RGB(b, m, q)
-    }
-}
-
-fun scaleTo255(value: Double) = (value * 255.0 + 0.5).toInt()
-
-data class HSB(val hue: Double, val saturation: Double, val brightness: Double)
-
-data class RGB(val red: Int, val green: Int, val blue: Int) {
-    override fun toString(): String {
-        return "#%02x%02x%02x".format(red, green, blue)
-    }
-}
-
-// See https://shields.io/endpoint
-fun buildShieldsJson(label: String, message: String, hsb: HSB) = """{
-    "schemaVersion": 1,
-    "label": "$label",
-    "message": "$message",
-    "color": "${HSBtoRGB(hsb)}"
-}"""
+apply(from = "gradle/writePitestShieldsJson.gradle.kts")

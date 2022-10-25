@@ -1,0 +1,15 @@
+apiVersion: skaffold/v3
+kind: Config
+metadata:
+  name: simple-pki
+build:
+  artifacts:
+  - image: ghcr.io/eliezio/simple-pki
+    jib: {}
+manifests:
+  rawYaml:
+  - k8s/postgres-secret.test.yaml
+  - k8s/postgres.yaml
+  - k8s/simple-pki.yaml
+deploy:
+  kubectl: {}
