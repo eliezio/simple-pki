@@ -20,11 +20,10 @@
 package org.nordix.simplepki.common
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier
+import org.bouncycastle.asn1.x500.AttributeTypeAndValue
 import org.bouncycastle.asn1.x500.RDN
 import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.asn1.x500.style.BCStyle
-import org.bouncycastle.cert.jcajce.JcaX500NameUtil
-import java.security.cert.X509Certificate
 import java.util.*
 
 object X500NameUtil {
@@ -38,13 +37,12 @@ object X500NameUtil {
         BCStyle.C
     )
 
-    fun canonicalSubjectName(certificate: X509Certificate): String {
-        val rdNs: Array<RDN> = JcaX500NameUtil.getSubject(certificate).rdNs
+    fun canonicalSubjectName(rdNs: Array<RDN>): String {
         Arrays.sort(
             rdNs, Comparator.comparing(
-                { rdn: RDN -> rdn.first.type },
-                Comparator.comparing { obj: ASN1ObjectIdentifier -> dnOrderOf(obj) }
-                    .thenComparing { obj: ASN1ObjectIdentifier -> obj.id }
+                { rdn: RDN -> rdn.first!! },
+                Comparator.comparing { atv: AttributeTypeAndValue -> dnOrderOf(atv.type) }
+                    .thenComparing { atv: AttributeTypeAndValue -> atv.value.toString() }
             )
         )
         return X500Name(rdNs).toString()
