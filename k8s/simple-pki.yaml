@@ -1,0 +1,82 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-pki-deployment
+spec:
+  selector:
+    matchLabels:
+      app: simple-pki
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: simple-pki
+    spec:
+      initContainers:
+        - name: init-postgres
+          image: busybox:1.28
+          env:
+            - name: K8S_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          command:
+            - sh
+            - -c
+            - >-
+              until nslookup postgres.$(K8S_NAMESPACE).svc.cluster.local; do
+                echo waiting for postgres;
+                sleep 2;
+              done
+      containers:
+        - name: simple-pki
+          image: ghcr.io/eliezio/simple-pki:1.0.1 # x-release-please-version
+          ports:
+            - containerPort: 8080
+              name: web
+          envFrom:
+            - configMapRef:
+                name: postgres-config
+            - secretRef:
+                name: postgres-secret
+          env:
+            - name: SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE
+              value: "2"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: $(POSTGRES_USER)
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: $(POSTGRES_PASSWORD)
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://$(POSTGRES_SERVICE_HOST):$(POSTGRES_SERVICE_PORT)/$(POSTGRES_DB)
+            - name: APP_PKI_KS_RESOURCE
+              value: classpath:/data/ca.p12
+          readinessProbe:
+            httpGet:
+              path: "/actuator/health/readiness"
+              port: web
+          livenessProbe:
+            initialDelaySeconds: 10
+            httpGet:
+              path: "/actuator/health/liveness"
+              port: web
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 500Mi
+            requests:
+              cpu: 500m
+              memory: 250Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: simple-pki
+spec:
+  type: LoadBalancer
+  selector:
+    app: simple-pki
+  ports:
+    - protocol: TCP
+      port: 8080
+      name: web

@@ -22,12 +22,9 @@ package org.nordix.simplepki.common
 import org.bouncycastle.cert.X509CertificateHolder
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
 import org.bouncycastle.openssl.PEMParser
-import org.bouncycastle.openssl.jcajce.JcaMiscPEMGenerator
-import org.bouncycastle.util.io.pem.PemWriter
-import java.io.ByteArrayOutputStream
-import java.io.OutputStreamWriter
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter
 import java.io.Reader
-import java.nio.charset.StandardCharsets
+import java.io.StringWriter
 import java.security.cert.X509Certificate
 import java.util.*
 
@@ -54,12 +51,11 @@ object PemConverter {
 
     @JvmStatic
     fun toPem(obj: Any): String {
-        val baos = ByteArrayOutputStream()
-        PemWriter(OutputStreamWriter(baos, StandardCharsets.US_ASCII)).use { writer ->
-            writer.writeObject(
-                JcaMiscPEMGenerator(obj).generate()
-            )
+        val stringWriter = StringWriter()
+        JcaPEMWriter(stringWriter).also {
+            it.writeObject(obj)
+            it.flush()
         }
-        return baos.toString(StandardCharsets.US_ASCII)
+        return stringWriter.toString()
     }
 }

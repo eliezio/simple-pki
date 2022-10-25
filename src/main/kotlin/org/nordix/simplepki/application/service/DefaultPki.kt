@@ -20,6 +20,7 @@
 package org.nordix.simplepki.application.service
 
 import org.bouncycastle.asn1.x509.CRLReason
+import org.bouncycastle.cert.jcajce.JcaX500NameUtil
 import org.bouncycastle.pkcs.PKCS10CertificationRequest
 import org.nordix.simplepki.application.port.`in`.Pki
 import org.nordix.simplepki.application.port.out.EndEntityRepository
@@ -38,7 +39,7 @@ import java.security.cert.X509Certificate
 import java.util.*
 
 @Component
-internal class PkiImpl(
+internal class DefaultPki(
     private val ca: PkiEntity,
     private val endEntityRepository: EndEntityRepository,
     private val pkiOperations: PkiOperations,
@@ -48,7 +49,7 @@ internal class PkiImpl(
         get() = ca.certificate
 
     override fun crlBuilder(): Pki.CrlBuilder {
-        return CrlBuilderImpl(endEntityRepository.allRevocations())
+        return DefaultCrlBuilder(endEntityRepository.allRevocations())
     }
 
     override fun sign(csr: PKCS10CertificationRequest): X509Certificate {
@@ -57,7 +58,7 @@ internal class PkiImpl(
         val entity = EndEntity(
             serialNumber = serialNumber,
             version = 0,
-            subject = X500NameUtil.canonicalSubjectName(cert),
+            subject = X500NameUtil.canonicalSubjectName(JcaX500NameUtil.getSubject(cert).rdNs),
             notValidBefore = cert.notBefore,
             notValidAfter = cert.notAfter,
             certificate = PemConverter.toPem(cert),
@@ -101,14 +102,13 @@ internal class PkiImpl(
     /**
      * A lazy CRL builder that allows the caller to avoid the CRL actual generation in case a filter criteria is met.
      */
-    private inner class CrlBuilderImpl(revocations: List<RevocationEntry>) : Pki.CrlBuilder {
+    private inner class DefaultCrlBuilder(revocations: List<RevocationEntry>) : Pki.CrlBuilder {
         private val revocations: List<RevocationEntry>
         private val editionDate: Date
 
         init {
             this.revocations = revocations
-            this.editionDate = revocations.maxOfOrNull { it.date }
-                ?: ca.certificate.notBefore
+            this.editionDate = if (revocations.isEmpty()) ca.certificate.notBefore else revocations.maxOf { it.date }
         }
 
         override fun editionTime(): Long =
