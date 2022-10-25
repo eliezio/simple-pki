@@ -17,7 +17,7 @@
  * SPDX-License-Identifier: Apache-2.0
  * ============LICENSE_END=========================================================
  */
-package org.nordix.simplepki.adapters.api
+package org.nordix.simplepki.application
 
 import com.epages.restdocs.apispec.ResourceDocumentation
 import com.epages.restdocs.apispec.ResourceSnippetParameters
@@ -25,7 +25,6 @@ import com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import groovy.sql.Sql
 import io.restassured.RestAssured
 import io.restassured.builder.RequestSpecBuilder
 import io.restassured.config.RestAssuredConfig
@@ -33,32 +32,25 @@ import io.restassured.filter.log.RequestLoggingFilter
 import io.restassured.filter.log.ResponseLoggingFilter
 import io.restassured.http.ContentType
 import io.restassured.specification.RequestSpecification
+import nl.altindag.log.LogCaptor
 import org.bouncycastle.asn1.x509.CRLReason
 import org.bouncycastle.cert.X509CertificateHolder
-import org.bouncycastle.util.test.FixedSecureRandom
-import org.junit.Rule
 import org.junit.jupiter.api.extension.ExtendWith
-import org.nordix.simplepki.application.BaseSpecification
 import org.nordix.simplepki.domain.model.EndEntity
 import org.nordix.simplepki.domain.model.PkiOperations
 import org.nordix.simplepki.domain.model.SerialNumberConverter
 import org.spockframework.spring.SpringSpy
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.restdocs.RestDocumentationContextProvider
 import org.springframework.restdocs.RestDocumentationExtension
-import org.springframework.test.context.TestPropertySource
-import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Stepwise
 
-import javax.sql.DataSource
-import java.security.SecureRandom
 import java.time.*
 import java.time.format.DateTimeFormatter
 
@@ -76,13 +68,8 @@ import static org.springframework.restdocs.request.RequestDocumentation.pathPara
 import static org.springframework.restdocs.restassured3.RestAssuredRestDocumentation.document
 import static org.springframework.restdocs.restassured3.RestAssuredRestDocumentation.documentationConfiguration
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestDocs
 @ExtendWith(RestDocumentationExtension)
-@TestPropertySource(locations = [
-    'classpath:test-db.properties',
-    'classpath:test-ks.properties'
-])
 @Stepwise
 class PkiRestControllerSpec extends BaseSpecification {
 
@@ -125,27 +112,20 @@ class PkiRestControllerSpec extends BaseSpecification {
         .registerModule(new KotlinModule.Builder().build())
         .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
 
-    @Autowired
-    DataSource dataSource
-
     // using a FixedClock in order to have predictable date/time on persisted data
     @Autowired
     Clock clock
-
-    @AutoCleanup
-    Sql sql
-
-    @Rule
-    EventCatcher evtCatcher = new EventCatcher()
 
     @Autowired
     RestDocumentationContextProvider restDocumentation
 
     RequestSpecification documentationSpec
 
+    LogCaptor logCaptor
+
     def setup() {
+        logCaptor = LogCaptor.forRoot()
         RestAssured.port = localPort
-        sql = new Sql(dataSource)
         documentationSpec = new RequestSpecBuilder()
             .addFilter(documentationConfiguration(restDocumentation)
                 .operationPreprocessors()
@@ -159,6 +139,11 @@ class PkiRestControllerSpec extends BaseSpecification {
             .build()
     }
 
+    def cleanup() {
+        logCaptor.clearLogs()
+        logCaptor.close()
+    }
+
     def 'report OK for #uri service'() {
         when: 'Request the resource'
             def response = given(this.documentationSpec)
@@ -170,7 +155,7 @@ class PkiRestControllerSpec extends BaseSpecification {
             response.statusCode == SC_OK
 
         where:
-            uri = '/healthz'
+            uri = '/actuator/health'
     }
 
     def 'supplies the current CA certificate in PEM format'() {
@@ -193,7 +178,7 @@ class PkiRestControllerSpec extends BaseSpecification {
         and: 'It is a valid CA certificate'
             validateCertificate(cert, null, CACERT_ISSUE_DATE, CACERT_ISSUE_DATE)
         and: 'The GET event was logged'
-            def event = validatedEvent(evtCatcher.getOnlyEvent())
+            def event = validatedEvent(getSingleLoggedEvent())
             ([evt: 'SERVICE', method: 'GET', uri: '/pki/v1/cacert', sc: '200'] - event).isEmpty()
 
         cleanup:
@@ -219,7 +204,7 @@ class PkiRestControllerSpec extends BaseSpecification {
         and: 'It is a valid and empty CRL'
             validateCrl(crl, caCert, [])
         and: 'The GET event was logged'
-            def event = validatedEvent(evtCatcher.getOnlyEvent())
+            def event = validatedEvent(getSingleLoggedEvent())
             ([evt: 'SERVICE', method: 'GET', uri: '/pki/v1/crl', sc: '200'] - event).isEmpty()
 
         cleanup:
@@ -242,7 +227,7 @@ class PkiRestControllerSpec extends BaseSpecification {
         then: 'Should generate CRL exact #expectedCrlGenerations time'
             expectedCrlGenerations * spiedPkiOperations.generateCrl(_, _, _)
         and: 'The GET event was logged'
-            def event = validatedEvent(evtCatcher.getOnlyEvent())
+            def event = validatedEvent(getSingleLoggedEvent())
             ([evt: 'SERVICE', method: 'GET', uri: '/pki/v1/crl', sc: expectedSc as String] - event).isEmpty()
 
         where:
@@ -287,8 +272,7 @@ class PkiRestControllerSpec extends BaseSpecification {
         given: 'Extract CSR from pre-created resource file'
             def csrLines = getClass().getResourceAsStream('/__data__/client-cert.csr').readLines()
         and: 'Assert that no certificate was issued so far'
-            //noinspection SqlDialectInspection,SqlNoDataSourceInspection
-            sql.firstRow('SELECT count(1) AS numberOfRows FROM END_ENTITY').numberOfRows == 0
+            currentNumberOfEndEntities() == 0
 
         when: 'Submit CSR in order to be signed by CA'
             def notBeforeMin = clock.instant()
@@ -327,7 +311,7 @@ class PkiRestControllerSpec extends BaseSpecification {
             def entity = fetchCertificateEntity(serialNumber)
             entity == expectedEntity
         and: 'The POST event was logged'
-            def event = validatedEvent(evtCatcher.getOnlyEvent())
+            def event = validatedEvent(getSingleLoggedEvent())
             ([evt: 'SERVICE', method: 'POST', uri: '/pki/v1/certificates', sc: '200'] - event).isEmpty()
 
         cleanup:
@@ -365,7 +349,7 @@ class PkiRestControllerSpec extends BaseSpecification {
         and:
             cert == cert1
         and: 'The GET event was logged'
-            def event = validatedEvent(evtCatcher.getOnlyEvent())
+            def event = validatedEvent(getSingleLoggedEvent())
             ([evt: 'SERVICE', method: 'GET', uri: "/pki/v1/certificates/$cert1SerialNumber", sc: '200'] - event).isEmpty()
     }
 
@@ -398,7 +382,7 @@ class PkiRestControllerSpec extends BaseSpecification {
             def entity = fetchCertificateEntity(cert1.serialNumber.longValue())
             entity == expectedEntity
         and: 'The DELETE event was logged'
-            def event = validatedEvent(evtCatcher.getOnlyEvent())
+            def event = validatedEvent(getSingleLoggedEvent())
             ([evt: 'SERVICE', method: 'DELETE', uri: "/pki/v1/certificates/$cert1SerialNumber", sc: '200'] - event).isEmpty()
 
         cleanup:
@@ -500,15 +484,21 @@ class PkiRestControllerSpec extends BaseSpecification {
     EndEntity fetchCertificateEntity(long serialNumber) {
         def rows = sql.rows("""
                 SELECT *
-                  FROM END_ENTITY
+                  FROM ${defaultSchema}.end_entity
                  WHERE serial_number = $serialNumber
-""")
+""" as String)
         assert rows.size() == 1
         return mapper.convertValue(lowerKeyMap(rows.first()), EndEntity)
     }
 
     Map lowerKeyMap(Map source) {
         return source.collectEntries { k, v -> [(k as String).toLowerCase(), v] }
+    }
+
+    Map getSingleLoggedEvent() {
+        def events = logCaptor.getInfoLogs().findAll { it.startsWith('evt=') }
+        assert events.size() == 1
+        return events.first().split(' ').collectEntries { part -> part.split('=', 2) }
     }
 
     static Map validatedEvent(Map evt) {
@@ -520,11 +510,6 @@ class PkiRestControllerSpec extends BaseSpecification {
 
     @TestConfiguration
     static class RepeatableBuildConfig {
-
-        @Bean
-        SecureRandom fakeRandom() {
-            return new FixedSecureRandom((0..255) as byte[])
-        }
 
         @Bean
         @Primary

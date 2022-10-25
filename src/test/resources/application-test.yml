@@ -1,0 +1,6 @@
+app:
+  pki:
+    ks:
+      keypass: changeit
+      resource: classpath:/__data__/ca.p12
+      storepass: changeit

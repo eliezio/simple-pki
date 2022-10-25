@@ -31,7 +31,7 @@ jobs:
             ]
           extra-files: |
             README.adoc
-            k8s/rcserver.yaml
+            k8s/simple-pki.yaml
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -53,14 +53,27 @@ jobs:
           VERSION=${{ steps.release.outputs.tag_name }}
           echo "RELEASE_VERSION=${VERSION#v}" >> $GITHUB_ENV
 
+      - name: Build
+        if: ${{ steps.release.outputs.release_created }}
+        run: |
+          ./gradlew clean test asciidoctor pitest \
+          --no-daemon --info --stacktrace \
+          -Pversion="${{ env.RELEASE_VERSION }}"
+
+      - name: Publish GH Pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ steps.release.outputs.release_created }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/reports
+
       - name: Build and publish container image
         if: ${{ steps.release.outputs.release_created }}
         run: |
-          ./gradlew clean :server:jib \
+          ./gradlew clean jib \
           --no-daemon --info --stacktrace \
           -Pversion="${{ env.RELEASE_VERSION }}" \
           -Djib.from.platforms=linux/amd64,linux/arm64 \
-          -Djib.to.image=ghcr.io/oscar-ng/rcserver:${{ env.RELEASE_VERSION }} \
           -Djib.to.auth.username=${{ secrets.CR_USERNAME }} \
           -Djib.to.auth.password=${{ secrets.CR_PAT }}
 ...

@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    labels:
+        app: simple-pki
+        environment: dev
+    name: docker-config-json
+    namespace: default
+type: kubernetes.io/dockerconfigjson
+data:
+    .dockerconfigjson: ENC[AES256_GCM,data:p/F1RZZr4J8jT/CHfCVQbKIjXcxKDIIZimRn3VOJOFvdWG5joswbGFUOkxWYfysgzq5oD1UALKkWLk11OwUC7kgFBjwUChi72Ye05FvMQBSLlmcKUfSBPxK0F67zOsyyVFBMw0cCPzJ+wTZBFpFblVQMhOuHJueYpfKsov3j1hKhp8Ql,iv:GDdstHnaG/NXpAOt/cFwTV0lN5E4m4SS9Mh/v8jLIz0=,tag:ijb8Ix289OOiZ/a0LEiMgA==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age:
+        - recipient: age17kv0my2mvxfgcjhl5khw57ggj5uj3e6gpz8kayszc3a2qp6ck3pqq4sz94
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBvYm45NWs1VG9naHYxTTdE
+            RDV4akJjams1K3lMcGRzNTJFMmhpd2I2K2lRCmZNUzgvWEszYVZ2akY5ZDAzOHJC
+            NGtjOHJ6ZXZXVHVWNVpHNVpYc1hOdHMKLS0tIHdveHY5REhZWHYwYkxzeUtIK2F2
+            SHV3RTBSdXI2UTJEYjRxVHBVTTVQak0KkhO185m7PhLElAZXhMX6jm5STzJA7zhv
+            jC+mD/8IoDuuncqXXBwILPMqvp91dOL4B+hQkoCeg4Nmzsiyrzxa/Q==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2022-10-26T00:17:04Z"
+    mac: ENC[AES256_GCM,data:Mhx832VQWdulvwMu/kEKHAfTjBECWx0JTnrWf+viWA7XQnMMXsUJ0SW75zPvmou7WgllUSw81gqrWJl9uLzZ+D2Cn63qRShzYDpK93ouDR5w53UnuZizNzbyIReivV9MD/mqvt61dqgtDJzWzhJ3OttUuU7+0Lc3isaZ+UBkn+U=,iv:zC9dV395nem3jQ3HYA/bPz6wvcR1Z+YivbfTEuFypzQ=,tag:eCS2hKfofslexz+9zYjdxw==,type:str]
+    pgp: []
+    encrypted_regex: ^(data|stringData)$
+    version: 3.7.3

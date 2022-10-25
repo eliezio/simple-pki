@@ -1,0 +1,3 @@
+creation_rules:
+  - path_regex: \.dev\.yaml$
+    age: 'age17kv0my2mvxfgcjhl5khw57ggj5uj3e6gpz8kayszc3a2qp6ck3pqq4sz94'
