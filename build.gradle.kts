@@ -40,7 +40,7 @@ plugins {
     id("com.epages.restdocs-api-spec") version "0.16.2"
     id("org.asciidoctor.jvm.convert") version "3.3.2"
 
-    id("com.google.cloud.tools.jib") version "3.3.0"
+    id("com.google.cloud.tools.jib") version "3.3.1"
 }
 
 apply(plugin = "io.spring.dependency-management")
