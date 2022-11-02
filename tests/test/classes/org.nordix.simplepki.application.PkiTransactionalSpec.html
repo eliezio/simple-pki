@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=edge"/>
+<title>Test results - PkiTransactionalSpec</title>
+<link href="../css/base-style.css" rel="stylesheet" type="text/css"/>
+<link href="../css/style.css" rel="stylesheet" type="text/css"/>
+<script src="../js/report.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="content">
+<h1>PkiTransactionalSpec</h1>
+<div class="breadcrumbs">
+<a href="../index.html">all</a> &gt; 
+<a href="../packages/org.nordix.simplepki.application.html">org.nordix.simplepki.application</a> &gt; PkiTransactionalSpec</div>
+<div id="summary">
+<table>
+<tr>
+<td>
+<div class="summaryGroup">
+<table>
+<tr>
+<td>
+<div class="infoBox" id="tests">
+<div class="counter">4</div>
+<p>tests</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="failures">
+<div class="counter">0</div>
+<p>failures</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="ignored">
+<div class="counter">0</div>
+<p>ignored</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="duration">
+<div class="counter">2.194s</div>
+<p>duration</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</td>
+<td>
+<div class="infoBox success" id="successRate">
+<div class="percent">100%</div>
+<p>successful</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div id="tabs">
+<ul class="tabLinks">
+<li>
+<a href="#tab0">Tests</a>
+</li>
+<li>
+<a href="#tab1">Standard output</a>
+</li>
+</ul>
+<div id="tab0" class="tab">
+<h2>Tests</h2>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Duration</th>
+<th>Result</th>
+</tr>
+</thead>
+<tr>
+<td class="success">generates certificate under normal circumstances</td>
+<td class="success">0.086s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">must commit 4 concurrent inclusions of EndEntity</td>
+<td class="success">2.091s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">must rollback the inclusion a new EndEntity when a Pki collaborator fails with java.lang.Exception</td>
+<td class="success">0.011s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">must rollback the inclusion a new EndEntity when a Pki collaborator fails with java.lang.RuntimeException</td>
+<td class="success">0.006s</td>
+<td class="success">passed</td>
+</tr>
+</table>
+</div>
+<div id="tab1" class="tab">
+<h2>Standard output</h2>
+<span class="code">
+<pre>  ____    _                       _            ____    _  __  ___
+ / ___|  (_)  _ __ ___    _ __   | |   ___    |  _ \  | |/ / |_ _|
+ \___ \  | | | '_ ` _ \  | '_ \  | |  / _ \   | |_) | | ' /   | |
+  ___) | | | | | | | | | | |_) | | | |  __/   |  __/  | . \   | |
+ |____/  |_| |_| |_| |_| | .__/  |_|  \___|   |_|     |_|\_\ |___|
+                         |_|
+
+Service: 
+Version: 
+
+Spring Boot v2.7.5
+
+15:31:36.673 ?[34mINFO ?[0;39m o.n.s.application.PkiTransactionalSpec   : Starting PkiTransactionalSpec using Java 11.0.16.1 on fv-az304-430 with PID 2029 (started by runner in /home/runner/work/simple-pki/simple-pki)
+15:31:36.673 ?[34mINFO ?[0;39m o.n.s.application.PkiTransactionalSpec   : The following 1 profile is active: &quot;test&quot;
+15:31:36.855 ?[34mINFO ?[0;39m .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+15:31:36.859 ?[34mINFO ?[0;39m .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 4 ms. Found 1 JPA repository interfaces.
+15:31:37.154 ?[31mWARN ?[0;39m io.undertow.websockets.jsr               : UT026010: Buffer pool was not set on WebSocketDeploymentInfo, the default pool will be used
+15:31:37.155 ?[34mINFO ?[0;39m io.undertow.servlet                      : Initializing Spring embedded WebApplicationContext
+15:31:37.156 ?[34mINFO ?[0;39m w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 480 ms
+15:31:37.351 ?[34mINFO ?[0;39m o.f.c.internal.license.VersionPrinter    : Flyway Community Edition 8.5.13 by Redgate
+15:31:37.352 ?[34mINFO ?[0;39m o.f.c.internal.license.VersionPrinter    : See what's new here: https://flywaydb.org/documentation/learnmore/releaseNotes#8.5.13
+15:31:37.352 ?[34mINFO ?[0;39m o.f.c.internal.license.VersionPrinter    : 
+15:31:37.353 ?[34mINFO ?[0;39m com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+15:31:37.379 ?[34mINFO ?[0;39m com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+15:31:37.380 ?[34mINFO ?[0;39m o.f.c.i.database.base.BaseDatabaseType   : Database: jdbc:postgresql://localhost:49154/test (PostgreSQL 14.4)
+15:31:37.394 ?[34mINFO ?[0;39m o.f.core.internal.command.DbValidate     : Successfully validated 4 migrations (execution time 00:00.007s)
+15:31:37.398 ?[34mINFO ?[0;39m o.f.core.internal.command.DbMigrate      : Current version of schema &quot;pki&quot;: 1
+15:31:37.400 ?[34mINFO ?[0;39m o.f.core.internal.command.DbMigrate      : Migrating schema &quot;pki&quot; with repeatable migration &quot;ResetTestData&quot;
+15:31:37.411 ?[34mINFO ?[0;39m o.f.core.internal.command.DbMigrate      : Successfully applied 1 migration to schema &quot;pki&quot; (execution time 00:00.015s)
+15:31:37.444 ?[34mINFO ?[0;39m o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+15:31:37.461 ?[34mINFO ?[0;39m org.hibernate.dialect.Dialect            : HHH000400: Using dialect: org.hibernate.dialect.PostgreSQL10Dialect
+15:31:37.479 ?[34mINFO ?[0;39m o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+15:31:37.480 ?[34mINFO ?[0;39m j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+15:31:37.931 ?[31mWARN ?[0;39m JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+15:31:38.336 ?[31mWARN ?[0;39m .b.a.g.t.GroovyTemplateAutoConfiguration : Cannot find template location: classpath:/templates/ (please add some templates, check your Groovy configuration, or set spring.groovy.template.check-template-location=false)
+15:31:38.361 ?[34mINFO ?[0;39m o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoint(s) beneath base path '/actuator'
+15:31:38.415 ?[34mINFO ?[0;39m io.undertow                              : starting server: Undertow - 2.2.20.Final
+15:31:38.421 ?[34mINFO ?[0;39m o.s.b.w.e.undertow.UndertowWebServer     : Undertow started on port(s) 35361 (http)
+15:31:38.429 ?[34mINFO ?[0;39m o.n.s.application.PkiTransactionalSpec   : Started PkiTransactionalSpec in 1.79 seconds (JVM running for 27.313)
+</pre>
+</span>
+</div>
+</div>
+<div id="footer">
+<p>
+<div>
+<label class="hidden" id="label-for-line-wrapping-toggle" for="line-wrapping-toggle">Wrap lines
+<input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
+</label>
+</div>Generated by 
+<a href="http://www.gradle.org">Gradle 7.5.1</a> at Nov 2, 2022, 3:31:45 PM</p>
+</div>
+</div>
+</body>
+</html>

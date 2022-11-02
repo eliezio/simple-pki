@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PemConverter.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">simple-pki</a> &gt; <a href="index.source.html" class="el_package">org.nordix.simplepki.common</a> &gt; <span class="el_source">PemConverter.kt</span></div><h1>PemConverter.kt</h1><pre class="source lang-java linenums">/*-
+ * ============LICENSE_START=======================================================
+ *  Copyright (C) 2019-2022 Nordix Foundation.
+ * ================================================================================
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ * ============LICENSE_END=========================================================
+ */
+package org.nordix.simplepki.common
+
+import org.bouncycastle.cert.X509CertificateHolder
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
+import org.bouncycastle.openssl.PEMParser
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter
+import java.io.Reader
+import java.io.StringWriter
+import java.security.cert.X509Certificate
+import java.util.*
+
+object PemConverter {
+
+    @Suppress(&quot;UNCHECKED_CAST&quot;)
+    @JvmStatic
+    fun &lt;T&gt; fromPem(reader: Reader, clazz: Class&lt;T&gt;): T {
+<span class="fc" id="L36">        val pemParser = PEMParser(reader)</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        val obj: Any = pemParser.readObject() ?: throw IllegalArgumentException(&quot;No PEM data was found&quot;)</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">        if (clazz.isInstance(obj)) {</span>
+<span class="fc" id="L39">            return clazz.cast(obj)</span>
+        }
+<span class="fc bfc" id="L41" title="All 2 branches covered.">        if (clazz == X509Certificate::class.java) {</span>
+<span class="fc" id="L42">            return JcaX509CertificateConverter().getCertificate(obj as X509CertificateHolder) as T</span>
+        }
+<span class="fc" id="L44">        throw IllegalArgumentException(</span>
+<span class="fc" id="L45">            String.format(Locale.getDefault(Locale.Category.FORMAT),</span>
+<span class="fc" id="L46">                &quot;An %s object was expected, whereas a %s object was found&quot;,</span>
+<span class="fc" id="L47">                clazz.simpleName, obj.javaClass.simpleName</span>
+            )
+        )
+    }
+
+    @JvmStatic
+    fun toPem(obj: Any): String {
+<span class="fc" id="L54">        val stringWriter = StringWriter()</span>
+<span class="fc" id="L55">        JcaPEMWriter(stringWriter).also {</span>
+<span class="fc" id="L56">            it.writeObject(obj)</span>
+<span class="fc" id="L57">            it.flush()</span>
+<span class="fc" id="L58">        }</span>
+<span class="fc" id="L59">        return stringWriter.toString()</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

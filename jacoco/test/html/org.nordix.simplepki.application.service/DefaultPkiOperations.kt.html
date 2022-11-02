@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DefaultPkiOperations.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">simple-pki</a> &gt; <a href="index.source.html" class="el_package">org.nordix.simplepki.application.service</a> &gt; <span class="el_source">DefaultPkiOperations.kt</span></div><h1>DefaultPkiOperations.kt</h1><pre class="source lang-java linenums">/*-
+ * ============LICENSE_START=======================================================
+ *  Copyright (C) 2019-2022 Nordix Foundation.
+ * ================================================================================
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ * ============LICENSE_END=========================================================
+ */
+package org.nordix.simplepki.application.service
+
+import org.bouncycastle.asn1.x509.Extension
+import org.bouncycastle.cert.X509v2CRLBuilder
+import org.bouncycastle.cert.jcajce.JcaX500NameUtil
+import org.bouncycastle.cert.jcajce.JcaX509CRLConverter
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
+import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils
+import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
+import org.bouncycastle.pkcs.PKCS10CertificationRequest
+import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest
+import org.nordix.simplepki.domain.model.PkiEntity
+import org.nordix.simplepki.domain.model.PkiOperations
+import org.nordix.simplepki.domain.model.RevocationEntry
+import org.springframework.stereotype.Component
+import java.math.BigInteger
+import java.security.cert.X509CRL
+import java.security.cert.X509Certificate
+import java.time.Clock
+import java.util.*
+
+<span class="fc" id="L42">@Component</span>
+<span class="fc" id="L43">internal class DefaultPkiOperations(private val clock: Clock) : PkiOperations {</span>
+
+    override fun signCsr(csr: PKCS10CertificationRequest, serialNumber: Long, ca: PkiEntity): X509Certificate {
+<span class="fc" id="L46">        val now = Date.from(clock.instant())</span>
+<span class="fc" id="L47">        val jcaRequest = JcaPKCS10CertificationRequest(csr)</span>
+<span class="fc" id="L48">        val extUtils = JcaX509ExtensionUtils()</span>
+<span class="fc" id="L49">        val certificateBuilder = JcaX509v3CertificateBuilder(</span>
+<span class="fc" id="L50">            JcaX500NameUtil.getSubject(ca.certificate),</span>
+<span class="fc" id="L51">            BigInteger.valueOf(serialNumber),</span>
+<span class="fc" id="L52">            now, CertificateSettings.NEVER_EXPIRES_DATE,</span>
+<span class="fc" id="L53">            jcaRequest.subject, jcaRequest.publicKey</span>
+        )
+<span class="fc" id="L55">        certificateBuilder</span>
+<span class="fc" id="L56">            .addExtension(</span>
+<span class="fc" id="L57">                Extension.authorityKeyIdentifier, false,</span>
+<span class="fc" id="L58">                extUtils.createAuthorityKeyIdentifier(ca.certificate)</span>
+            )
+<span class="fc" id="L60">            .addExtension(</span>
+<span class="fc" id="L61">                Extension.subjectKeyIdentifier, false,</span>
+<span class="fc" id="L62">                extUtils.createSubjectKeyIdentifier(jcaRequest.publicKey)</span>
+            )
+<span class="fc" id="L64">            .addExtension(Extension.basicConstraints, true, CertificateSettings.NON_CA_BASIC_CONSTRAINTS)</span>
+<span class="fc" id="L65">            .addExtension(Extension.keyUsage, true, CertificateSettings.NON_CA_KEY_USAGES)</span>
+<span class="fc" id="L66">            .addExtension(Extension.extendedKeyUsage, true, CertificateSettings.EXTENDED_KEY_USAGES)</span>
+<span class="fc" id="L67">        val signer = JcaContentSignerBuilder(CertificateSettings.SIGNATURE_ALGORITHM)</span>
+<span class="fc" id="L68">            .build(ca.privateKey)</span>
+<span class="fc" id="L69">        return JcaX509CertificateConverter()</span>
+<span class="fc" id="L70">            .getCertificate(certificateBuilder.build(signer))</span>
+    }
+
+    override fun generateCrl(revocations: List&lt;RevocationEntry&gt;, editionDate: Date, ca: PkiEntity): X509CRL {
+<span class="fc" id="L74">        val crlBuilder = X509v2CRLBuilder(JcaX500NameUtil.getSubject(ca.certificate), editionDate)</span>
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        for (entry in revocations) {</span>
+<span class="fc" id="L76">            crlBuilder.addCRLEntry(</span>
+<span class="fc" id="L77">                BigInteger.valueOf(entry.serialNumber),</span>
+<span class="fc" id="L78">                entry.date, entry.reason</span>
+            )
+        }
+<span class="fc" id="L81">        val contentSigner = JcaContentSignerBuilder(CertificateSettings.SIGNATURE_ALGORITHM)</span>
+<span class="fc" id="L82">            .build(ca.privateKey)</span>
+<span class="fc" id="L83">        val crlHolder = crlBuilder.build(contentSigner)</span>
+<span class="fc" id="L84">        return JcaX509CRLConverter()</span>
+<span class="fc" id="L85">            .getCRL(crlHolder)</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

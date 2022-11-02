@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ServiceEventLogger.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">simple-pki</a> &gt; <a href="index.source.html" class="el_package">org.nordix.simplepki.adapters.api</a> &gt; <span class="el_source">ServiceEventLogger.kt</span></div><h1>ServiceEventLogger.kt</h1><pre class="source lang-java linenums">/*-
+ * ============LICENSE_START=======================================================
+ *  Copyright (C) 2019-2022 Nordix Foundation.
+ * ================================================================================
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ * ============LICENSE_END=========================================================
+ */
+package org.nordix.simplepki.adapters.api
+
+import mu.KotlinLogging
+import org.springframework.stereotype.Component
+import javax.servlet.Filter
+import javax.servlet.FilterChain
+import javax.servlet.ServletRequest
+import javax.servlet.ServletResponse
+import javax.servlet.annotation.WebFilter
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
+
+<span class="fc" id="L32">private val logger = KotlinLogging.logger {}</span>
+
+<span class="fc" id="L34">@Component</span>
+@WebFilter(&quot;/pki/**&quot;)
+<span class="fc" id="L36">internal class ServiceEventLogger : Filter {</span>
+
+    override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
+<span class="fc" id="L39">        val startTime = System.currentTimeMillis()</span>
+<span class="fc" id="L40">        try {</span>
+<span class="fc" id="L41">            chain.doFilter(request, response)</span>
+        } finally {
+<span class="fc" id="L43">            logRequest(request, response, startTime)</span>
+        }
+<span class="fc" id="L45">    }</span>
+
+    private fun logRequest(
+        request: ServletRequest,
+        response: ServletResponse,
+        startTime: Long
+    ) {
+<span class="fc" id="L52">        val req = request as HttpServletRequest</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        if (!req.requestURI.startsWith(&quot;/actuator&quot;)) {</span>
+<span class="fc" id="L54">            val resp = response as HttpServletResponse</span>
+<span class="fc" id="L55">            logger.info(</span>
+<span class="fc" id="L56">                &quot;evt=SERVICE method={} uri={} sc={} elapsed={}&quot;,</span>
+<span class="fc" id="L57">                req.method, req.requestURI, resp.status, System.currentTimeMillis() - startTime</span>
+            )
+        }
+<span class="fc" id="L60">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

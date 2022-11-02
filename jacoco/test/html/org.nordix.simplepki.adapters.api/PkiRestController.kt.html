@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PkiRestController.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">simple-pki</a> &gt; <a href="index.source.html" class="el_package">org.nordix.simplepki.adapters.api</a> &gt; <span class="el_source">PkiRestController.kt</span></div><h1>PkiRestController.kt</h1><pre class="source lang-java linenums">/*-
+ * ============LICENSE_START=======================================================
+ *  Copyright (C) 2019-2022 Nordix Foundation.
+ * ================================================================================
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ * ============LICENSE_END=========================================================
+ */
+package org.nordix.simplepki.adapters.api
+
+import org.bouncycastle.pkcs.PKCS10CertificationRequest
+import org.nordix.simplepki.application.port.`in`.Pki
+import org.nordix.simplepki.common.PemConverter
+import org.nordix.simplepki.domain.model.SerialNumberConverter
+import org.springframework.http.ContentDisposition
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.context.request.ServletWebRequest
+import java.io.Reader
+import java.time.Clock
+import java.util.*
+import javax.validation.constraints.Pattern
+
+<span class="fc" id="L42">@RestController</span>
+@RequestMapping(&quot;/pki/v1&quot;)
+<span class="fc" id="L44">internal class PkiRestController(</span>
+<span class="fc" id="L45">    private val pki: Pki,</span>
+<span class="fc" id="L46">    private val clock: Clock,</span>
+) {
+
+    @GetMapping(&quot;/cacert&quot;)
+    fun caCertificate(): ResponseEntity&lt;String&gt; {
+<span class="fc" id="L51">        val caCert = pki.caCert</span>
+<span class="fc" id="L52">        return attachmentBuilder(&quot;cacert.pem&quot;, APPLICATION_X_PEM_FILE)</span>
+<span class="fc" id="L53">            .lastModified(caCert.notBefore.toInstant())</span>
+<span class="fc" id="L54">            .body(PemConverter.toPem(caCert))</span>
+    }
+
+    @GetMapping(&quot;/crl&quot;)
+    fun getCrl(swr: ServletWebRequest): ResponseEntity&lt;String&gt; {
+<span class="fc" id="L59">        val crlBuilder = pki.crlBuilder()</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        if (swr.checkNotModified(crlBuilder.editionTime())) {</span>
+<span class="fc" id="L61">            throw ResourceNotModifiedException()</span>
+        }
+<span class="fc" id="L63">        val crl = crlBuilder.build()</span>
+<span class="fc" id="L64">        return attachmentBuilder(&quot;crl.pem&quot;, APPLICATION_X_PEM_FILE)</span>
+<span class="fc" id="L65">            .lastModified(crl.thisUpdate.toInstant())</span>
+<span class="fc" id="L66">            .body(PemConverter.toPem(crl))</span>
+    }
+
+    @PostMapping(&quot;/certificates&quot;)
+    fun issueCertificate(csrReader: Reader): ResponseEntity&lt;String&gt; {
+<span class="fc" id="L71">        val request =</span>
+<span class="fc" id="L72">            PemConverter.fromPem(csrReader, PKCS10CertificationRequest::class.java)</span>
+<span class="fc" id="L73">        val cert = pki.sign(request)</span>
+<span class="fc" id="L74">        return attachmentBuilder(&quot;cert.pem&quot;, APPLICATION_X_PEM_FILE)</span>
+<span class="fc" id="L75">            .header(&quot;X-Cert-Serial-Number&quot;, SerialNumberConverter.toString(cert.serialNumber))</span>
+<span class="fc" id="L76">            .body(PemConverter.toPem(cert))</span>
+    }
+
+    @GetMapping(&quot;/certificates/{serialNumber}&quot;)
+    fun getCertificate(
+        @PathVariable serialNumber: @Pattern(regexp = SerialNumberConverter.REGEXP) String
+    ): ResponseEntity&lt;String&gt; {
+<span class="fc" id="L83">        val cert = pki.getCertificate(serialNumber)</span>
+<span class="fc" id="L84">        return attachmentBuilder(&quot;cert.pem&quot;, APPLICATION_X_PEM_FILE)</span>
+<span class="fc" id="L85">            .body(PemConverter.toPem(cert))</span>
+    }
+
+    @DeleteMapping(&quot;/certificates/{serialNumber}&quot;)
+    fun revokeCertificate(
+        @PathVariable serialNumber: @Pattern(regexp = SerialNumberConverter.REGEXP) String
+    ): ResponseEntity&lt;Void&gt; {
+<span class="fc bfc" id="L92" title="All 2 branches covered.">        if (!pki.revoke(serialNumber, Date.from(clock.instant()))) {</span>
+<span class="fc" id="L93">            throw ResourceNotModifiedException()</span>
+        }
+<span class="fc" id="L95">        return ResponseEntity.ok().build()</span>
+    }
+
+    companion object {
+<span class="fc" id="L99">        private val APPLICATION_X_PEM_FILE = MediaType.valueOf(&quot;application/x-pem-file&quot;)</span>
+
+        private fun attachmentBuilder(filename: String, contentType: MediaType): ResponseEntity.BodyBuilder {
+<span class="fc" id="L102">            val contentDisposition = ContentDisposition.builder(&quot;attachment&quot;)</span>
+<span class="fc" id="L103">                .filename(filename)</span>
+<span class="fc" id="L104">                .build()</span>
+<span class="fc" id="L105">            return ResponseEntity.ok()</span>
+<span class="fc" id="L106">                .contentType(contentType)</span>
+<span class="fc" id="L107">                .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
