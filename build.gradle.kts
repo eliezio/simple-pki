@@ -105,6 +105,7 @@ dependencies {
     testImplementation("com.tngtech.archunit", "archunit-junit5", versions.archunit.get())
     testImplementation("io.github.hakky54", "logcaptor", versions.logcaptor.get())
     testImplementation("io.rest-assured", "rest-assured")
+    testImplementation("org.awaitility", "awaitility", versions.awaitility.get())
     testImplementation("org.codehaus.groovy", "groovy-sql")
     testImplementation("org.flywaydb", "flyway-core")
     testImplementation("org.spockframework", "spock-core")

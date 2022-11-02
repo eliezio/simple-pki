@@ -59,6 +59,7 @@ import static io.restassured.config.EncoderConfig.encoderConfig
 import static java.lang.System.lineSeparator
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME
 import static javax.servlet.http.HttpServletResponse.*
+import static org.awaitility.Awaitility.await
 import static org.springframework.http.HttpHeaders.IF_MODIFIED_SINCE
 import static org.springframework.http.HttpHeaders.LAST_MODIFIED
 import static org.springframework.restdocs.headers.HeaderDocumentation.*
@@ -496,7 +497,11 @@ class PkiRestControllerSpec extends BaseSpecification {
     }
 
     Map getSingleLoggedEvent() {
-        def events = logCaptor.getInfoLogs().findAll { it.startsWith('evt=') }
+        def events = await()
+            .until(
+                () -> logCaptor.getInfoLogs().findAll { it.startsWith('evt=') },
+                (List<String> events) -> !events.isEmpty()
+            )
         assert events.size() == 1
         return events.first().split(' ').collectEntries { part -> part.split('=', 2) }
     }
