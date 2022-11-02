@@ -1,5 +1,37 @@
 # Changelog
 
+## [1.1.0](https://github.com/eliezio/simple-pki/compare/v1.0.0...v1.1.0) (2022-11-02)
+
+
+### 🐞 Bug Fixes
+
+* **core:** Fix CA configuration, broken in container mode ([7b4c29f](https://github.com/eliezio/simple-pki/commit/7b4c29ff4a3a6b05fe94914dc9cc102f5987da13))
+* **core:** Fix missing Implementation-Title and Version when running from docker image ([1af6972](https://github.com/eliezio/simple-pki/commit/1af69721e5eca009dc1f978d78157bcab9d886fa))
+* **core:** Using JVM 11 in docker image ([f36c6e7](https://github.com/eliezio/simple-pki/commit/f36c6e7b2266d160824db4ad5f84d917dc0f404b))
+
+
+### 🚧 Refactor
+
+* **core:** Refactor to fit on Homberg's proposal of Hexagonal Architecture ([46a57c2](https://github.com/eliezio/simple-pki/commit/46a57c2e26fde892879a8370276cae77ca378485))
+* **core:** Refactor to Hexagonal Architecture ([521e302](https://github.com/eliezio/simple-pki/commit/521e30248cb36e6c63d19a6d0b288bb19cf119a8))
+* **core:** Rename SingleEntityRepository to PkiEntityRepository ([244b697](https://github.com/eliezio/simple-pki/commit/244b697ee3222b3f0e495e4c9107e8bfa1688cbc))
+* **core:** Replace MockMvc by RestAssured ([4e35904](https://github.com/eliezio/simple-pki/commit/4e359048e7ed18a028491d10de41888b67b4152a))
+* **core:** Simple ServiceEventLogger using Filter ([8719b9b](https://github.com/eliezio/simple-pki/commit/8719b9bf97c3f09e5d58390fec44532a2ec8c008))
+* Drop support to lazy loading of CA cert ([a26fa80](https://github.com/eliezio/simple-pki/commit/a26fa80d0e812ea33ab22fdd283d41c73dbd55fd))
+* Introduce detekt plugin ([27eb50c](https://github.com/eliezio/simple-pki/commit/27eb50c85bc9b821b19b388cf978762a350fd15b))
+* Merge UT and IT ([b6f8f88](https://github.com/eliezio/simple-pki/commit/b6f8f8868754f4d4c9c5a7476eaea92adbe6f222))
+* Migrate to Kotlin ([0bc1300](https://github.com/eliezio/simple-pki/commit/0bc13002b159cbb0effe2c3afef257df5d18a129))
+
+
+### 🚇 Continuous Integration
+
+* Add GH workflows (check, release-please) ([402875a](https://github.com/eliezio/simple-pki/commit/402875a82472e68060d96a01dd78f097fede9d6d))
+
+
+### ⭐ New Features
+
+* Switch to PostgreSQL ([196c602](https://github.com/eliezio/simple-pki/commit/196c602b111aa4c84049eb1e9eff6ffd06f417eb))
+
 ## [1.0.1](https://github.com/eliezio/simple-pki/compare/v1.0.0...v1.0.1) (2022-09-25)
 
 
