@@ -41,7 +41,7 @@
 </td>
 <td>
 <div class="infoBox" id="duration">
-<div class="counter">2.194s</div>
+<div class="counter">2.149s</div>
 <p>duration</p>
 </div>
 </td>
@@ -79,12 +79,12 @@
 </thead>
 <tr>
 <td class="success">generates certificate under normal circumstances</td>
-<td class="success">0.086s</td>
+<td class="success">0.041s</td>
 <td class="success">passed</td>
 </tr>
 <tr>
 <td class="success">must commit 4 concurrent inclusions of EndEntity</td>
-<td class="success">2.091s</td>
+<td class="success">2.090s</td>
 <td class="success">passed</td>
 </tr>
 <tr>
@@ -94,7 +94,7 @@
 </tr>
 <tr>
 <td class="success">must rollback the inclusion a new EndEntity when a Pki collaborator fails with java.lang.RuntimeException</td>
-<td class="success">0.006s</td>
+<td class="success">0.007s</td>
 <td class="success">passed</td>
 </tr>
 </table>
@@ -114,33 +114,33 @@ Version:
 
 Spring Boot v2.7.5
 
-15:31:36.673 ?[34mINFO ?[0;39m o.n.s.application.PkiTransactionalSpec   : Starting PkiTransactionalSpec using Java 11.0.16.1 on fv-az304-430 with PID 2029 (started by runner in /home/runner/work/simple-pki/simple-pki)
-15:31:36.673 ?[34mINFO ?[0;39m o.n.s.application.PkiTransactionalSpec   : The following 1 profile is active: &quot;test&quot;
-15:31:36.855 ?[34mINFO ?[0;39m .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-15:31:36.859 ?[34mINFO ?[0;39m .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 4 ms. Found 1 JPA repository interfaces.
-15:31:37.154 ?[31mWARN ?[0;39m io.undertow.websockets.jsr               : UT026010: Buffer pool was not set on WebSocketDeploymentInfo, the default pool will be used
-15:31:37.155 ?[34mINFO ?[0;39m io.undertow.servlet                      : Initializing Spring embedded WebApplicationContext
-15:31:37.156 ?[34mINFO ?[0;39m w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 480 ms
-15:31:37.351 ?[34mINFO ?[0;39m o.f.c.internal.license.VersionPrinter    : Flyway Community Edition 8.5.13 by Redgate
-15:31:37.352 ?[34mINFO ?[0;39m o.f.c.internal.license.VersionPrinter    : See what's new here: https://flywaydb.org/documentation/learnmore/releaseNotes#8.5.13
-15:31:37.352 ?[34mINFO ?[0;39m o.f.c.internal.license.VersionPrinter    : 
-15:31:37.353 ?[34mINFO ?[0;39m com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
-15:31:37.379 ?[34mINFO ?[0;39m com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
-15:31:37.380 ?[34mINFO ?[0;39m o.f.c.i.database.base.BaseDatabaseType   : Database: jdbc:postgresql://localhost:49154/test (PostgreSQL 14.4)
-15:31:37.394 ?[34mINFO ?[0;39m o.f.core.internal.command.DbValidate     : Successfully validated 4 migrations (execution time 00:00.007s)
-15:31:37.398 ?[34mINFO ?[0;39m o.f.core.internal.command.DbMigrate      : Current version of schema &quot;pki&quot;: 1
-15:31:37.400 ?[34mINFO ?[0;39m o.f.core.internal.command.DbMigrate      : Migrating schema &quot;pki&quot; with repeatable migration &quot;ResetTestData&quot;
-15:31:37.411 ?[34mINFO ?[0;39m o.f.core.internal.command.DbMigrate      : Successfully applied 1 migration to schema &quot;pki&quot; (execution time 00:00.015s)
-15:31:37.444 ?[34mINFO ?[0;39m o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-15:31:37.461 ?[34mINFO ?[0;39m org.hibernate.dialect.Dialect            : HHH000400: Using dialect: org.hibernate.dialect.PostgreSQL10Dialect
-15:31:37.479 ?[34mINFO ?[0;39m o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
-15:31:37.480 ?[34mINFO ?[0;39m j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-15:31:37.931 ?[31mWARN ?[0;39m JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-15:31:38.336 ?[31mWARN ?[0;39m .b.a.g.t.GroovyTemplateAutoConfiguration : Cannot find template location: classpath:/templates/ (please add some templates, check your Groovy configuration, or set spring.groovy.template.check-template-location=false)
-15:31:38.361 ?[34mINFO ?[0;39m o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoint(s) beneath base path '/actuator'
-15:31:38.415 ?[34mINFO ?[0;39m io.undertow                              : starting server: Undertow - 2.2.20.Final
-15:31:38.421 ?[34mINFO ?[0;39m o.s.b.w.e.undertow.UndertowWebServer     : Undertow started on port(s) 35361 (http)
-15:31:38.429 ?[34mINFO ?[0;39m o.n.s.application.PkiTransactionalSpec   : Started PkiTransactionalSpec in 1.79 seconds (JVM running for 27.313)
+17:09:02.241 ?[34mINFO ?[0;39m o.n.s.application.PkiTransactionalSpec   : Starting PkiTransactionalSpec using Java 11.0.16.1 on fv-az108-435 with PID 2765 (started by runner in /home/runner/work/simple-pki/simple-pki)
+17:09:02.242 ?[34mINFO ?[0;39m o.n.s.application.PkiTransactionalSpec   : The following 1 profile is active: &quot;test&quot;
+17:09:02.468 ?[34mINFO ?[0;39m .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+17:09:02.474 ?[34mINFO ?[0;39m .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 4 ms. Found 1 JPA repository interfaces.
+17:09:02.774 ?[31mWARN ?[0;39m io.undertow.websockets.jsr               : UT026010: Buffer pool was not set on WebSocketDeploymentInfo, the default pool will be used
+17:09:02.775 ?[34mINFO ?[0;39m io.undertow.servlet                      : Initializing Spring embedded WebApplicationContext
+17:09:02.775 ?[34mINFO ?[0;39m w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 531 ms
+17:09:02.958 ?[34mINFO ?[0;39m o.f.c.internal.license.VersionPrinter    : Flyway Community Edition 8.5.13 by Redgate
+17:09:02.958 ?[34mINFO ?[0;39m o.f.c.internal.license.VersionPrinter    : See what's new here: https://flywaydb.org/documentation/learnmore/releaseNotes#8.5.13
+17:09:02.958 ?[34mINFO ?[0;39m o.f.c.internal.license.VersionPrinter    : 
+17:09:02.960 ?[34mINFO ?[0;39m com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+17:09:03.028 ?[34mINFO ?[0;39m com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+17:09:03.030 ?[34mINFO ?[0;39m o.f.c.i.database.base.BaseDatabaseType   : Database: jdbc:postgresql://localhost:49156/test (PostgreSQL 14.4)
+17:09:03.051 ?[34mINFO ?[0;39m o.f.core.internal.command.DbValidate     : Successfully validated 4 migrations (execution time 00:00.010s)
+17:09:03.057 ?[34mINFO ?[0;39m o.f.core.internal.command.DbMigrate      : Current version of schema &quot;pki&quot;: 1
+17:09:03.061 ?[34mINFO ?[0;39m o.f.core.internal.command.DbMigrate      : Migrating schema &quot;pki&quot; with repeatable migration &quot;ResetTestData&quot;
+17:09:03.092 ?[34mINFO ?[0;39m o.f.core.internal.command.DbMigrate      : Successfully applied 1 migration to schema &quot;pki&quot; (execution time 00:00.039s)
+17:09:03.130 ?[34mINFO ?[0;39m o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+17:09:03.146 ?[34mINFO ?[0;39m org.hibernate.dialect.Dialect            : HHH000400: Using dialect: org.hibernate.dialect.PostgreSQL10Dialect
+17:09:03.194 ?[34mINFO ?[0;39m o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+17:09:03.195 ?[34mINFO ?[0;39m j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+17:09:03.619 ?[31mWARN ?[0;39m JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+17:09:04.085 ?[31mWARN ?[0;39m .b.a.g.t.GroovyTemplateAutoConfiguration : Cannot find template location: classpath:/templates/ (please add some templates, check your Groovy configuration, or set spring.groovy.template.check-template-location=false)
+17:09:04.114 ?[34mINFO ?[0;39m o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoint(s) beneath base path '/actuator'
+17:09:04.162 ?[34mINFO ?[0;39m io.undertow                              : starting server: Undertow - 2.2.20.Final
+17:09:04.166 ?[34mINFO ?[0;39m o.s.b.w.e.undertow.UndertowWebServer     : Undertow started on port(s) 43499 (http)
+17:09:04.175 ?[34mINFO ?[0;39m o.n.s.application.PkiTransactionalSpec   : Started PkiTransactionalSpec in 1.968 seconds (JVM running for 23.474)
 </pre>
 </span>
 </div>
@@ -152,7 +152,7 @@ Spring Boot v2.7.5
 <input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
 </label>
 </div>Generated by 
-<a href="http://www.gradle.org">Gradle 7.5.1</a> at Nov 2, 2022, 3:31:45 PM</p>
+<a href="http://www.gradle.org">Gradle 7.5.1</a> at Nov 2, 2022, 5:09:11 PM</p>
 </div>
 </div>
 </body>
