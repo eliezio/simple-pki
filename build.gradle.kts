@@ -36,7 +36,7 @@ plugins {
     id("org.sonarqube") version "3.5.0.2730"
     id("com.adarshr.test-logger") version "3.2.0"
     id("com.github.ksoichiro.console.reporter") version "0.6.3"
-    id("com.epages.restdocs-api-spec") version "0.16.2"
+    id("com.epages.restdocs-api-spec") version "0.17.1"
     id("org.asciidoctor.jvm.convert") version "3.3.2"
 
     id("com.google.cloud.tools.jib") version "3.3.1"
