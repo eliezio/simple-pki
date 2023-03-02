@@ -33,7 +33,7 @@ plugins {
 
     // Quality / Documentation Plugins
     id("io.gitlab.arturbosch.detekt") version "1.22.0"
-    id("org.sonarqube") version "3.5.0.2730"
+    id("org.sonarqube") version "4.0.0.2929"
     id("com.adarshr.test-logger") version "3.2.0"
     id("com.github.ksoichiro.console.reporter") version "0.6.3"
     id("com.epages.restdocs-api-spec") version "0.17.1"
