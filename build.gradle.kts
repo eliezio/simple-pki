@@ -29,7 +29,7 @@ plugins {
     id("org.ajoberstar.grgit") version "5.0.0"
     id("com.github.ben-manes.versions") version "0.46.0"
 
-    id("info.solidsoft.pitest") version "1.9.0"
+    id("info.solidsoft.pitest") version "1.9.11"
 
     // Quality / Documentation Plugins
     id("io.gitlab.arturbosch.detekt") version "1.22.0"
