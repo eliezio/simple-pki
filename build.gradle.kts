@@ -264,7 +264,7 @@ springBoot {
     buildInfo {
         properties {
             //** reproducible build
-            time = null
+            excludes.set(setOf("time"))
         }
     }
 }
