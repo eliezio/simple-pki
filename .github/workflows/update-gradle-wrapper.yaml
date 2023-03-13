@@ -11,6 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
       - name: Update Gradle Wrapper
         uses: gradle-update/update-gradle-wrapper-action@v1
+
       - uses: gradle/wrapper-validation-action@v1
