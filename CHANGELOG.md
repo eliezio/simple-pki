@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/eliezio/simple-pki/compare/v1.1.0...v1.1.1) (2023-03-24)
+
+
+### 🐞 Bug Fixes
+
+* Exclusion of time from buildInfo.properties ([8cdd2e2](https://github.com/eliezio/simple-pki/commit/8cdd2e27159cc2f5c5cd5f9f949c27b8940693b6))
+
 ## [1.1.0](https://github.com/eliezio/simple-pki/compare/v1.0.0...v1.1.0) (2022-11-02)
 
 
