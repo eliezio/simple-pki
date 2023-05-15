@@ -39,7 +39,7 @@ plugins {
     id("com.epages.restdocs-api-spec") version "0.17.1"
     id("org.asciidoctor.jvm.convert") version "3.3.2"
 
-    id("com.google.cloud.tools.jib") version "3.3.1"
+    id("com.google.cloud.tools.jib") version "3.3.2"
 }
 
 description = "Simple-PKI API"
