@@ -17,7 +17,7 @@ plugins {
     groovy
     jacoco
 
-    val kotlinVersion = "1.8.20"
+    val kotlinVersion = "1.9.0"
     kotlin("jvm") version kotlinVersion
     kotlin("kapt") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
