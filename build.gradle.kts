@@ -24,7 +24,7 @@ plugins {
     kotlin("plugin.jpa") version kotlinVersion
 
     id("org.springframework.boot") version "3.0.5"
-    id("io.spring.dependency-management") version "1.1.0"
+    id("io.spring.dependency-management") version "1.1.4"
 
     id("org.ajoberstar.grgit") version "5.0.0"
     id("com.github.ben-manes.versions") version "0.46.0"
