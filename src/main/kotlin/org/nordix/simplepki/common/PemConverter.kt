@@ -25,6 +25,7 @@ import org.bouncycastle.openssl.PEMParser
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter
 import java.io.Reader
 import java.io.StringWriter
+import java.nio.charset.MalformedInputException
 import java.security.cert.X509Certificate
 import java.util.*
 
@@ -34,7 +35,11 @@ object PemConverter {
     @JvmStatic
     fun <T> fromPem(reader: Reader, clazz: Class<T>): T {
         val pemParser = PEMParser(reader)
-        val obj: Any = pemParser.readObject() ?: throw IllegalArgumentException("No PEM data was found")
+        val obj: Any = try {
+            pemParser.readObject()
+        } catch (e: MalformedInputException) {
+            null
+        } ?: throw IllegalArgumentException("No PEM data was found")
         if (clazz.isInstance(obj)) {
             return clazz.cast(obj)
         }

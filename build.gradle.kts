@@ -17,29 +17,25 @@ plugins {
     groovy
     jacoco
 
-    val kotlinVersion = "1.9.22"
+    // detekt plugin 1.23.4 requires 1.9.21 :-(
+    val kotlinVersion = "1.9.21"
     kotlin("jvm") version kotlinVersion
     kotlin("kapt") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
     kotlin("plugin.jpa") version kotlinVersion
 
-    id("org.springframework.boot") version "3.1.1"
-    id("io.spring.dependency-management") version "1.1.4"
-
-    id("org.ajoberstar.grgit") version "5.0.0"
-    id("com.github.ben-manes.versions") version "0.46.0"
-
+    id("com.adarshr.test-logger") version "4.0.0"
+    id("com.epages.restdocs-api-spec") version "0.19.0"
+    id("com.github.ben-manes.versions") version "0.50.0"
+    id("com.google.cloud.tools.jib") version "3.4.0"
     id("info.solidsoft.pitest") version "1.9.11"
-
-    // Quality / Documentation Plugins
-    id("io.gitlab.arturbosch.detekt") version "1.22.0"
-    id("org.sonarqube") version "4.0.0.2929"
-    id("com.adarshr.test-logger") version "3.2.0"
-    id("com.github.ksoichiro.console.reporter") version "0.6.3"
-    id("com.epages.restdocs-api-spec") version "0.17.1"
+    id("io.gitlab.arturbosch.detekt") version "1.23.4"
+    id("io.spring.dependency-management") version "1.1.4"
+    id("org.ajoberstar.grgit") version "5.2.1"
     id("org.asciidoctor.jvm.convert") version "3.3.2"
-
-    id("com.google.cloud.tools.jib") version "3.3.1"
+    id("org.barfuin.gradle.jacocolog") version "3.1.0"
+    id("org.sonarqube") version "4.4.1.3373"
+    id("org.springframework.boot") version "3.2.1"
 }
 
 description = "Simple-PKI API"
@@ -60,7 +56,7 @@ val scmProject = "simple-pki"
 val mainClassName = "org.nordix.simplepki.Application"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
 }
 
 repositories {
@@ -101,12 +97,13 @@ dependencies {
     runtimeOnly("org.flywaydb", "flyway-core")
 
     testImplementation("ch.qos.logback", "logback-classic")
+    testImplementation("com.epages", "restdocs-api-spec", versions.restdocs.apispec.get())
     testImplementation("com.epages", "restdocs-api-spec-restassured", versions.restdocs.apispec.get())
     testImplementation("com.tngtech.archunit", "archunit-junit5", versions.archunit.get())
     testImplementation("io.github.hakky54", "logcaptor", versions.logcaptor.get())
     testImplementation("io.rest-assured", "rest-assured")
+    testImplementation("org.apache.groovy", "groovy-sql")
     testImplementation("org.awaitility", "awaitility", versions.awaitility.get())
-    testImplementation("org.codehaus.groovy", "groovy-sql")
     testImplementation("org.flywaydb", "flyway-core")
     testImplementation("org.spockframework", "spock-core")
     testImplementation("org.spockframework", "spock-spring")
@@ -118,10 +115,8 @@ dependencies {
     testRuntimeOnly("com.athaydes", "spock-reports", versions.spock.reports.get())
 }
 
-val docsDir = "$buildDir/resources/main/static"
-file(docsDir).mkdirs()
-
-val snippetsDir = "$buildDir/generated-snippets"
+val docsDir = project.layout.buildDirectory.dir("resources/main/static")
+val snippetsDir = project.layout.buildDirectory.dir("generated-snippets")
 
 kapt {
     arguments {
@@ -133,7 +128,7 @@ kapt {
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
 }
 
@@ -155,11 +150,10 @@ tasks.withType<Test> {
     useJUnitPlatform()
 
     // faster start-up time
-    jvmArgs("-noverify", "-XX:TieredStopAtLevel=1")
+    jvmArgs("-XX:TieredStopAtLevel=1")
 
     // register this extra output dir
     outputs.dir(snippetsDir)
-    finalizedBy(tasks.reportCoverage)
 }
 
 /*
@@ -191,10 +185,6 @@ tasks.jacocoTestCoverageVerification {
             }
         }
     }
-}
-
-tasks.reportCoverage {
-    dependsOn(tasks.jacocoTestReport)
 }
 
 tasks.check {
@@ -230,6 +220,12 @@ tasks.pitest {
  */
 tasks.asciidoctor {
     dependsOn(tasks.test)
+    forkOptions {
+        jvmArgs(
+            "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED",
+            "--add-opens=java.base/java.io=ALL-UNNAMED"
+        )
+    }
 
     configurations("asciidoctorExt")
     sourceDir("$projectDir/src/docs/asciidoc")
@@ -241,10 +237,16 @@ tasks.asciidoctor {
 }
 
 configure<com.epages.restdocs.apispec.gradle.OpenApi3Extension> {
-    outputDirectory = docsDir
+    outputDirectory = docsDir.get().toString()
     setServer("http://localhost:8080")
     title = project.description!!
     version = project.version.toString()
+}
+
+tasks.withType<com.epages.restdocs.apispec.gradle.OpenApi3Task> {
+    doFirst {
+        docsDir.get().asFile.mkdirs()
+    }
 }
 
 /*
@@ -297,7 +299,7 @@ val dockerRegistry: String? by project
 
 jib {
     from {
-        image = "amazoncorretto:11"
+        image = "amazoncorretto:17"
     }
     to {
         val tagVersion = version.toString()
@@ -336,7 +338,7 @@ val upgradesToIgnore = listOf(
     "org.flywaydb:flyway-core:>\${currentVersionMajor}",
     "org.hibernate.validator:hibernate-validator:>\${currentVersionMajor}",
     "org.postgresql:postgresql:>\${currentVersionMajor}.\${currentVersionMinor}",
-    "io.rest-assured:rest-assured:>\${currentVersionMajor}",
+    "io.rest-assured:rest-assured:>\${currentVersionMajor}.\${currentVersionMinor}",
 )
 
 fun moduleMatcher(moduleSpec: String, currentVersion: String): (ModuleComponentIdentifier) -> Boolean {
@@ -364,8 +366,7 @@ fun moduleMatcher(moduleSpec: String, currentVersion: String): (ModuleComponentI
 
 tasks.dependencyUpdates {
     rejectVersionIf {
-        candidate.version.endsWith("-groovy-4.0")
-            || isNonStable(candidate.version)
+        isNonStable(candidate.version)
             || upgradesToIgnore.any { moduleMatcher(it, currentVersion)(candidate) }
     }
 }

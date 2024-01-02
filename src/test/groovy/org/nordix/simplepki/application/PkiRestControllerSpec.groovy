@@ -56,9 +56,9 @@ import java.time.format.DateTimeFormatter
 
 import static io.restassured.RestAssured.given
 import static io.restassured.config.EncoderConfig.encoderConfig
+import static jakarta.servlet.http.HttpServletResponse.*
 import static java.lang.System.lineSeparator
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME
-import static javax.servlet.http.HttpServletResponse.*
 import static org.awaitility.Awaitility.await
 import static org.springframework.http.HttpHeaders.IF_MODIFIED_SINCE
 import static org.springframework.http.HttpHeaders.LAST_MODIFIED
@@ -66,8 +66,8 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.*
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters
-import static org.springframework.restdocs.restassured3.RestAssuredRestDocumentation.document
-import static org.springframework.restdocs.restassured3.RestAssuredRestDocumentation.documentationConfiguration
+import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document
+import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.documentationConfiguration
 
 @AutoConfigureRestDocs
 @ExtendWith(RestDocumentationExtension)
@@ -132,7 +132,7 @@ class PkiRestControllerSpec extends BaseSpecification {
                 .operationPreprocessors()
                 .withRequestDefaults(modifyUris().port(8080))
                 .withResponseDefaults(
-                    removeHeaders('Connection', 'Date'),
+                    modifyHeaders().remove('Connection').remove('Date'),
                     prettyPrint()
                 ))
             .addFilter(new RequestLoggingFilter())

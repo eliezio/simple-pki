@@ -19,6 +19,7 @@
  */
 package org.nordix.simplepki.adapters.api
 
+import jakarta.validation.constraints.Pattern
 import org.bouncycastle.pkcs.PKCS10CertificationRequest
 import org.nordix.simplepki.application.port.`in`.Pki
 import org.nordix.simplepki.common.PemConverter
@@ -37,7 +38,6 @@ import org.springframework.web.context.request.ServletWebRequest
 import java.io.Reader
 import java.time.Clock
 import java.util.*
-import javax.validation.constraints.Pattern
 
 @RestController
 @RequestMapping("/pki/v1")

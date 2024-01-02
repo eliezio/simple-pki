@@ -35,7 +35,6 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.lifecycle.Startables
 import org.testcontainers.utility.DockerImageName
 import spock.lang.AutoCleanup
@@ -51,7 +50,6 @@ import static org.nordix.simplepki.common.PemConverter.fromPem
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@Testcontainers
 class BaseSpecification extends Specification {
 
     static final Date NEVER_EXPIRE_DATE = Date.from(Instant.parse('9999-12-31T23:59:59Z'))

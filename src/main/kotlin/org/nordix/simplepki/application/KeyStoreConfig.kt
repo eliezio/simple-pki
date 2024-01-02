@@ -19,16 +19,14 @@
  */
 package org.nordix.simplepki.application
 
-import org.springframework.boot.context.properties.ConstructorBinding
+import jakarta.validation.constraints.NotBlank
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.core.io.Resource
 import org.springframework.validation.annotation.Validated
-import javax.validation.constraints.NotBlank
 
 /**
  * All configurable parameters required to access a KeyStore.
  */
-@ConstructorBinding
 @ConfigurationProperties(prefix = "app.pki.ks")
 @Validated
 data class KeyStoreConfig (
