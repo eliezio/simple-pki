@@ -27,7 +27,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.4"
 
     id("org.ajoberstar.grgit") version "5.0.0"
-    id("com.github.ben-manes.versions") version "0.46.0"
+    id("com.github.ben-manes.versions") version "0.50.0"
 
     id("info.solidsoft.pitest") version "1.9.11"
 
