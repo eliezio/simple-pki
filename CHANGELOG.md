@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.1](https://github.com/eliezio/simple-pki/compare/v1.1.0...v1.1.1) (2024-01-04)
+
+
+### 🐞 Bug Fixes
+
+* Exclusion of time from buildInfo.properties ([8cdd2e2](https://github.com/eliezio/simple-pki/commit/8cdd2e27159cc2f5c5cd5f9f949c27b8940693b6))
+
+
+### 🚧 Refactor
+
+* Migrate to Spring Boot 3.2.1 and Java 17 ([1a771ae](https://github.com/eliezio/simple-pki/commit/1a771ae0aaf6e54e006c4ae1fe46d8ccee7b9b09))
+
 ## [1.1.0](https://github.com/eliezio/simple-pki/compare/v1.0.0...v1.1.0) (2022-11-02)
 
 
