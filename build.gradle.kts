@@ -18,7 +18,7 @@ plugins {
     jacoco
 
     // detekt plugin 1.23.4 requires 1.9.21 :-(
-    val kotlinVersion = "1.9.21"
+    val kotlinVersion = "1.9.22"
     kotlin("jvm") version kotlinVersion
     kotlin("kapt") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
