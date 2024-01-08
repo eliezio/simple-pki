@@ -32,7 +32,7 @@ plugins {
     id("io.gitlab.arturbosch.detekt") version "1.23.4"
     id("io.spring.dependency-management") version "1.1.4"
     id("org.ajoberstar.grgit") version "5.2.1"
-    id("org.asciidoctor.jvm.convert") version "3.3.2"
+    id("org.asciidoctor.jvm.convert") version "4.0.0"
     id("org.barfuin.gradle.jacocolog") version "3.1.0"
     id("org.sonarqube") version "4.4.1.3373"
     id("org.springframework.boot") version "3.2.1"
