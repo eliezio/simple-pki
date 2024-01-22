@@ -35,7 +35,7 @@ plugins {
     id("org.asciidoctor.jvm.convert") version "3.3.2"
     id("org.barfuin.gradle.jacocolog") version "3.1.0"
     id("org.sonarqube") version "4.4.1.3373"
-    id("org.springframework.boot") version "3.2.1"
+    id("org.springframework.boot") version "3.2.2"
 }
 
 description = "Simple-PKI API"
