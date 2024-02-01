@@ -29,7 +29,7 @@ plugins {
     id("com.github.ben-manes.versions") version "0.50.0"
     id("com.google.cloud.tools.jib") version "3.4.0"
     id("info.solidsoft.pitest") version "1.9.11"
-    id("io.gitlab.arturbosch.detekt") version "1.23.4"
+    id("io.gitlab.arturbosch.detekt") version "1.23.5"
     id("io.spring.dependency-management") version "1.1.4"
     id("org.ajoberstar.grgit") version "5.2.1"
     id("org.asciidoctor.jvm.convert") version "3.3.2"
