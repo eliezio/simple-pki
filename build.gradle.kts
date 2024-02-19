@@ -31,7 +31,7 @@ plugins {
     id("info.solidsoft.pitest") version "1.9.11"
     id("io.gitlab.arturbosch.detekt") version "1.23.4"
     id("io.spring.dependency-management") version "1.1.4"
-    id("org.ajoberstar.grgit") version "5.2.1"
+    id("org.ajoberstar.grgit") version "5.2.2"
     id("org.asciidoctor.jvm.convert") version "3.3.2"
     id("org.barfuin.gradle.jacocolog") version "3.1.0"
     id("org.sonarqube") version "4.4.1.3373"
