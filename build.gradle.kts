@@ -25,7 +25,7 @@ plugins {
     kotlin("plugin.jpa") version kotlinVersion
 
     id("com.adarshr.test-logger") version "4.0.0"
-    id("com.epages.restdocs-api-spec") version "0.19.0"
+    id("com.epages.restdocs-api-spec") version "0.19.2"
     id("com.github.ben-manes.versions") version "0.50.0"
     id("com.google.cloud.tools.jib") version "3.4.0"
     id("info.solidsoft.pitest") version "1.9.11"
