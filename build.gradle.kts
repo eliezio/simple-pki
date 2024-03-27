@@ -34,7 +34,7 @@ plugins {
     id("org.ajoberstar.grgit") version "5.2.1"
     id("org.asciidoctor.jvm.convert") version "3.3.2"
     id("org.barfuin.gradle.jacocolog") version "3.1.0"
-    id("org.sonarqube") version "4.4.1.3373"
+    id("org.sonarqube") version "5.0.0.4638"
     id("org.springframework.boot") version "3.2.1"
 }
 
