@@ -1,0 +1,59 @@
+volumes:
+  postgres_data:
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      TZ: America/Sao_Paulo
+      update: 1
+      POSTGRES_DB: PKI
+      POSTGRES_USER: pki
+      POSTGRES_PASSWORD: s3cret
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h localhost -p 5432 -d $$POSTGRES_DB -U $$POSTGRES_USER"]
+      start_period: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    ports:
+      - "5432:5432"
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      TZ: America/Sao_Paulo
+      server_port: 8080
+      management_server_port: 8081
+      management_endpoints_web_exposure_include: info,health,prometheus
+      management_endpoints_web_basePath: /actuator
+      management_endpoint_health_probes_enabled: true
+      management_endpoint_health_showDetails: never
+      management_health_defaults_enabled: false
+      spring.datasource.username: pki
+      spring.datasource.password: s3cret
+      spring.datasource.url: jdbc:postgresql://postgres:5432/PKI
+      spring.flyway.connect-retries: 10
+    # volumes:
+    #   - ./config:/app/config
+    healthcheck:
+      start_period: 30s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      test: curl -fsSL http://127.0.0.1:8081/actuator/health
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 512M
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy

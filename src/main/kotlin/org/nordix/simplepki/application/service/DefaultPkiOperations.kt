@@ -29,6 +29,9 @@ import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
 import org.bouncycastle.pkcs.PKCS10CertificationRequest
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers
+import org.bouncycastle.asn1.x509.Extensions
+import org.bouncycastle.asn1.x509.GeneralNames
 import org.nordix.simplepki.domain.model.PkiEntity
 import org.nordix.simplepki.domain.model.PkiOperations
 import org.nordix.simplepki.domain.model.RevocationEntry
@@ -64,6 +67,13 @@ internal class DefaultPkiOperations(private val clock: Clock) : PkiOperations {
             .addExtension(Extension.basicConstraints, true, CertificateSettings.NON_CA_BASIC_CONSTRAINTS)
             .addExtension(Extension.keyUsage, true, CertificateSettings.NON_CA_KEY_USAGES)
             .addExtension(Extension.extendedKeyUsage, true, CertificateSettings.EXTENDED_KEY_USAGES)
+
+        // Add the Subject Alternative Name (SAN) extension if present in the CSR
+        val sanExtension = getSubjectAlternativeNames(csr)
+        if (sanExtension != null) {
+            certificateBuilder.addExtension(Extension.subjectAlternativeName, false, sanExtension)
+        }
+
         val signer = JcaContentSignerBuilder(CertificateSettings.SIGNATURE_ALGORITHM)
             .build(ca.privateKey)
         return JcaX509CertificateConverter()
@@ -83,5 +93,19 @@ internal class DefaultPkiOperations(private val clock: Clock) : PkiOperations {
         val crlHolder = crlBuilder.build(contentSigner)
         return JcaX509CRLConverter()
             .getCRL(crlHolder)
+    }
+
+    private fun getSubjectAlternativeNames(csr: PKCS10CertificationRequest): GeneralNames? {
+        val attributes = csr.attributes
+        for (attribute in attributes) {
+            if (attribute.attrType == PKCSObjectIdentifiers.pkcs_9_at_extensionRequest) {
+                val extensions = Extensions.getInstance(attribute.attrValues.getObjectAt(0))
+                val sanExtension = extensions.getExtension(Extension.subjectAlternativeName)
+                if (sanExtension != null) {
+                    return GeneralNames.getInstance(sanExtension.parsedValue)
+                }
+            }
+        }
+        return null
     }
 }
