@@ -1,5 +1,6 @@
 import com.github.gundy.semver4j.SemVer
 import com.github.gundy.semver4j.model.Version
+import de.undercouch.gradle.tasks.download.Download
 import org.apache.commons.text.StringSubstitutor
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -28,7 +29,8 @@ plugins {
     id("com.epages.restdocs-api-spec") version "0.19.0"
     id("com.github.ben-manes.versions") version "0.50.0"
     id("com.google.cloud.tools.jib") version "3.4.0"
-    id("info.solidsoft.pitest") version "1.9.11"
+    id("de.undercouch.download") version "5.5.0"
+    id("info.solidsoft.pitest") version "1.15.0"
     id("io.gitlab.arturbosch.detekt") version "1.23.4"
     id("io.spring.dependency-management") version "1.1.4"
     id("org.ajoberstar.grgit") version "5.2.1"
@@ -113,10 +115,13 @@ dependencies {
     testImplementation("org.testcontainers", "postgresql")
 
     testRuntimeOnly("com.athaydes", "spock-reports", versions.spock.reports.get())
+
+    pitest("com.groupcdg.arcmutate:arcmutate-spring:0.0.10")
+    pitest("com.groupcdg.pitest:pitest-kotlin-plugin:1.1.6")
 }
 
-val docsDir = project.layout.buildDirectory.dir("resources/main/static")
-val snippetsDir = project.layout.buildDirectory.dir("generated-snippets")
+val docsDir = layout.buildDirectory.dir("resources/main/static")
+val snippetsDir = layout.buildDirectory.dir("generated-snippets")
 
 kapt {
     arguments {
@@ -146,14 +151,20 @@ tasks.withType<AbstractArchiveTask> {
 /*
  * All Tests
  */
+apply(plugin = "org.nordix.gradle.plugins.springContextUsage")
+
 tasks.withType<Test> {
     useJUnitPlatform()
 
     // faster start-up time
-    jvmArgs("-XX:TieredStopAtLevel=1")
+    jvmArgs(
+        "-XX:TieredStopAtLevel=1",
+        "-Dlogging.level.org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate=trace",
+    )
 
     // register this extra output dir
     outputs.dir(snippetsDir)
+    finalizedBy("ctxstat")
 }
 
 /*
@@ -195,8 +206,8 @@ tasks.check {
  * Pitest
  */
 pitest {
-    pitestVersion.set("1.9.8")
-    junit5PluginVersion.set("1.1.0")
+    pitestVersion.set("1.15.3")
+    junit5PluginVersion.set("1.2.1")
     excludedClasses.set(listOf(
         mainClassName,
         "org.nordix.simplepki.application.KeyStoreConfig",
@@ -213,6 +224,13 @@ tasks.pitest {
     dependsOn(tasks.test)
 
     finalizedBy("writePitestShieldsJson")
+}
+
+tasks.register<Download>("arcmutateLicence") {
+    src("https://subscriptions.arcmutate.com/ef9140ae-9472-4172-b6fe-6da8ad87378e/cdg-pitest-licence.txt")
+    dest(layout.buildDirectory.file("reports/pitest/arcmutate-licences/cdg-pitest-licence.txt").get().asFile)
+    onlyIfModified(true)
+    overwrite(true)
 }
 
 /*
